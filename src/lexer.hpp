@@ -12,12 +12,14 @@ using filesystem::path;
 enum class TokenType {
     ret,
     integer,
-    statement_end
+    stmt_begin,
+    stmt_end,
+    ident
 };
 
 struct Token {
     TokenType type;
-    optional<int> value;
+    optional<string> value;
 };
 
 
@@ -31,13 +33,17 @@ private:
         while (source_file >> token) {
             try {
                 int value = stoi(token);
-                tokens.push_back({TokenType::integer, value});
+                tokens.push_back({TokenType::integer, token});
             }
             catch (std::invalid_argument const& ex) {
                 if (token == "&") {
                     tokens.push_back({TokenType::ret});
+                } else if (token == "<") {
+                    tokens.push_back({TokenType::stmt_begin});
                 } else if (token == ">") {
-                    tokens.push_back({TokenType::statement_end});
+                    tokens.push_back({TokenType::stmt_end});
+                } else if (token == "@") {
+                    tokens.push_back({TokenType::ident, token});
                 } else {
                     cerr << "Buoya does not support that\n";
                     exit(4);

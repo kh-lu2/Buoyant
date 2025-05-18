@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 
     Lexer lexer(filepath);
     Parser parser(lexer.get_tokens());
-    Generator generator(parser.get_node_exit());
+    Generator generator(parser.get_node_prog());
 
 
     ofstream output_file("build/out.asm");
@@ -47,5 +47,6 @@ error codes:
 4 -> syntax buoya doesnt support (lexer)
 5 -> invalid expression (parser)
 6 -> no statement end
-
+7 -> no statement after statement begin
+8 -> syntax error
 */
