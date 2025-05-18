@@ -18,6 +18,23 @@ struct Token {
     optional<int> value;
 };
 
+string tokens_to_asm(const vector<Token>& tokens) {
+    string assembly = "global _start\n_start:\n";
+    for (int i = 0; i < tokens.size(); i++) {
+        const Token& token = tokens[i];
+        if (token.type== TokenType::ret) {
+            if (i + 2 < tokens.size() &&
+                tokens[i + 1].type == TokenType::integer &&
+                tokens[i + 2].type == TokenType::statement_end) {
+                    assembly += "    mov rax, 60\n";
+                    assembly += "    mov rdi, " + to_string(tokens[i + 1].value.value()) + "\n";
+                    assembly += "    syscall\n";
+                }
+        }
+    }
+    return assembly;
+}
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -55,7 +72,14 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+    source.close();
 
-    cout << argv[1] << "\n";
+    ofstream output_file("output_files/out.asm");
+    output_file << tokens_to_asm(tokens);
+    output_file.close();
+    
+    system("cd output_files && nasm -felf64 out.asm");
+    system("cd output_files && ld -o out out.o");
+
     return 0;
 }
