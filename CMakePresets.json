@@ -1,0 +1,20 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "MakeConfigure",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_MAKE_PROGRAM": "make"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "MakeBuild",
+            "configurePreset": "MakeConfigure"
+        }
+    ]
+}
