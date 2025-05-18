@@ -3,7 +3,10 @@
 #include <iostream>
 #include <optional>
 #include <filesystem>
+
 #include "lexer.hpp"
+#include "parser.hpp"
+#include "generator.hpp"
 
 using namespace std;
 using filesystem::path;
@@ -39,9 +42,12 @@ int main(int argc, char* argv[]) {
     }
 
     Lexer lexer(filepath);
+    Parser parser(lexer.get_tokens());
+    Generator generator(parser.get_node_exit());
+
 
     ofstream output_file("output_files/out.asm");
-    output_file << tokens_to_asm(lexer.get_tokens());
+    output_file << generator.get_assembly();
     output_file.close();
     
     system("cd output_files && nasm -felf64 out.asm");
@@ -49,3 +55,15 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+/*
+error codes:
+0 -> everything ok
+1 -> wrong usage
+2 -> wrong file extention
+3 -> ifstream failed
+4 -> syntax buoya doesnt support (lexer)
+5 -> invalid expression (parser)
+6 -> no statement end
+
+*/
