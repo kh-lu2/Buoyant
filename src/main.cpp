@@ -28,12 +28,12 @@ int main(int argc, char* argv[]) {
     Generator generator(parser.get_node_exit());
 
 
-    ofstream output_file("output_files/out.asm");
+    ofstream output_file("build/out.asm");
     output_file << generator.get_assembly();
     output_file.close();
     
-    system("cd output_files && nasm -felf64 out.asm");
-    system("cd output_files && ld -o out out.o");
+    system("cd build && nasm -felf64 out.asm");
+    system("cd build && ld -o out out.o");
 
     return 0;
 }
