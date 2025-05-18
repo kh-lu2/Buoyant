@@ -4,4 +4,4 @@ project(buoyant)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(buoyant src/main.cpp)
+add_executable(buoyant src/main.cpp src/lexer.hpp)

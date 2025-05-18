@@ -1,22 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <optional>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <filesystem>
+#include "lexer.hpp"
 
 using namespace std;
 using filesystem::path;
-
-enum class TokenType {
-    ret,
-    integer,
-    statement_end
-};
-
-struct Token {
-    TokenType type;
-    optional<int> value;
-};
 
 string tokens_to_asm(const vector<Token>& tokens) {
     string assembly = "global _start\n_start:\n";
@@ -48,34 +38,10 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
-    ifstream source(filepath);
-    if (source.fail()) {
-        cerr << "Something wrong with file or filepath...\n";
-        return 3;
-    }
-
-    vector<Token> tokens;
-    string str;
-    while (source >> str) {
-        try {
-            int value = stoi(str);
-            tokens.push_back({TokenType::integer, value});
-        }
-        catch (std::invalid_argument const& ex) {
-            if (str == "&") {
-                tokens.push_back({TokenType::ret});
-            } else if (str == ">") {
-                tokens.push_back({TokenType::statement_end});
-            } else {
-                cerr << "Buoya does not support that\n";
-                return 4;
-            }
-        }
-    }
-    source.close();
+    Lexer lexer(filepath);
 
     ofstream output_file("output_files/out.asm");
-    output_file << tokens_to_asm(tokens);
+    output_file << tokens_to_asm(lexer.get_tokens());
     output_file.close();
     
     system("cd output_files && nasm -felf64 out.asm");
