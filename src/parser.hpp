@@ -71,9 +71,9 @@ private:
 
             return NodeStmt{NodeStmtRet{exitnode}};
         } else if (next().has_value() && next().value().type == TokenType::ident) {
-            ++current;
             NodeStmtVar varnode;
             varnode.ident = next().value();
+            ++current;
             if (auto node_expr = parse_expr()) {
                 varnode.node_expr = node_expr.value();
             } else {

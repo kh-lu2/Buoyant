@@ -49,4 +49,6 @@ error codes:
 6 -> no statement end
 7 -> no statement after statement begin
 8 -> syntax error
+9 -> double declaration
+10 -> no such variable name
 */

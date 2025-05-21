@@ -44,6 +44,11 @@ private:
                     tokens.push_back({TokenType::stmt_end});
                 } else if (token == "@") {
                     tokens.push_back({TokenType::ident, token});
+                } else if (token == "$") {
+                    tokens.push_back({TokenType::ident, token});
+                } else if (token == "#") {
+                    tokens.push_back({TokenType::ident, token});
+                    //add more variable name support ;)
                 } else {
                     cerr << "Buoya does not support that\n";
                     exit(4);

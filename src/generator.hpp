@@ -1,51 +1,64 @@
 #pragma once
 
 #include "parser.hpp"
+#include <unordered_map>
 
 class Generator {
 private:
     NodeProg root;
     string assembly;
+    int stack_ptr = 0;
 
-    string gen_expr(NodeExpr& expr) {
+    struct Var {
+        int stack_index;
+    };
+
+    unordered_map<string, Var> variables;
+
+    void gen_expr(const NodeExpr& expr) {
         struct ExprVisitor {
+            Generator* gen;
+            ExprVisitor(Generator* gen) : gen(gen){}
             void operator() (const NodeExprInt& expr_int) {
-
+                gen->assembly += "    mov rax, " + expr_int.integer.value.value() + "\n";
+                gen->push("rax");
             }
             void operator() (const NodeExprIdent& expr_ident) {
-
+                if (!gen->variables.contains(expr_ident.ident.value.value())) {
+                    cerr << "No variable like that\n";
+                    exit(10);
+                }
+                gen->push("qword [rsp + " + to_string((gen->stack_ptr - gen->variables[expr_ident.ident.value.value()].stack_index - 1) * 8) + "]");
             }
         };
-        ExprVisitor visitor;
+        ExprVisitor visitor(this);
         visit(visitor, expr.var);
     }
 
-    string gen_stmt(NodeStmt& stmt) {
-        string tmp;
-
+    void gen_stmt(const NodeStmt& stmt) {
         struct StmtVisitor {
-            string& tmp;
+            Generator* gen;
+            StmtVisitor(Generator* gen) : gen(gen) {}
 
             void operator()(const NodeStmtRet& stmt_exit) {
-                if (holds_alternative<NodeExprInt>(stmt_exit.node_expr.var)) {
-                    auto expr_int = get<NodeExprInt>(stmt_exit.node_expr.var);
-                    tmp += "    mov rax, 60\n";
-                    tmp += "    mov rdi, " + expr_int.integer.value.value() + "\n";
-                    tmp += "    syscall\n";
-                } else {
-                    std::cerr << "Expected integer expression in return!\n";
-                    std::exit(9);
-                }
+                gen->gen_expr(stmt_exit.node_expr);
+                gen->assembly += "    mov rax, 60\n";
+                gen->pop("rdi");
+                gen->assembly += "    syscall\n";
             }
 
             void operator()(const NodeStmtVar& stmt_var) {
+                if (gen->variables.contains(stmt_var.ident.value.value())) {
+                    cerr << "Double declaration\n";
+                    exit(9);
+                }
+                gen->variables[stmt_var.ident.value.value()] = Var{gen->stack_ptr};
+                gen->gen_expr(stmt_var.node_expr);
             }
         };
 
-        StmtVisitor visitor{tmp};
+        StmtVisitor visitor(this);
         visit(visitor, stmt.var);
-
-        return tmp;
     }
 
 
@@ -53,13 +66,24 @@ private:
         assembly = "global _start\n_start:\n";
 
         for (auto &NodeStmt: root.stmts) {
-            assembly += gen_stmt(NodeStmt);
+            gen_stmt(NodeStmt);
         }
 
         assembly += "    mov rax, 60\n";
         assembly += "    mov rdi, 0\n";
         assembly += "    syscall\n";
     }
+
+    void push(const string& reg) {
+        assembly += "    push " + reg + "\n";
+        stack_ptr++;
+    }
+
+    void pop(const string& reg) {
+        assembly += "    pop " + reg + "\n";
+        stack_ptr--;
+    }
+
 public:
     Generator(NodeProg root) : root(root){
         gen_prog();
