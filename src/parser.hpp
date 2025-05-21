@@ -50,7 +50,7 @@ private:
         optional<Token> next_token = next();
         if (next_token.has_value() && next_token.value().type == TokenType::integer) {
             return NodeExpr{NodeExprInt{tokens[++current]}};
-        } else if (next_token.has_value() &&  next_token.value().type == TokenType::ident) {
+        } else if (next_token.has_value() &&  next_token.value().type == TokenType::identifier) {
             return NodeExpr{NodeExprIdent{tokens[++current]}};
         } else {
             return {};
@@ -61,25 +61,45 @@ private:
         if (next().has_value() && next().value().type == TokenType::ret) {
             ++current;
             NodeStmtRet exitnode;
-            if (auto node_expr = parse_expr()) {
-                exitnode.node_expr = node_expr.value();
+
+            if (next().has_value() && next().value().type == TokenType::assign_expr) {
+                ++current;
+                if (auto node_expr = parse_expr()) {
+                    exitnode.node_expr = node_expr.value();
+                } else {
+                    cerr << "Invalid expression\n";
+                    exit(5);
+                }
+            } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
+                exitnode.node_expr = NodeExpr{NodeExprInt{TokenType::integer, "0"}};
+                current++;
             } else {
-                cerr << "Invalid expression\n";
-                exit(5);
+                cerr << "Invalid return statement\n";
+                exit(11);
             }
             look_for_stmt_end();
 
             return NodeStmt{NodeStmtRet{exitnode}};
-        } else if (next().has_value() && next().value().type == TokenType::ident) {
+        } else if (next().has_value() && next().value().type == TokenType::identifier) {
             NodeStmtVar varnode;
             varnode.ident = next().value();
             ++current;
-            if (auto node_expr = parse_expr()) {
-                varnode.node_expr = node_expr.value();
+            if (next().has_value() && next().value().type == TokenType::assign_expr) {
+                ++current;
+                if (auto node_expr = parse_expr()) {
+                    varnode.node_expr = node_expr.value();
+                } else {
+                    cerr << "Invalid expression\n";
+                    exit(5);
+                }
+            } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
+                varnode.node_expr = NodeExpr{NodeExprInt{TokenType::integer, "0"}};
+                current++;
             } else {
-                cerr << "Invalid expression\n";
-                exit(5);
+                cerr << "Invalid variable assignment\n";
+                exit(12);
             }
+
             look_for_stmt_end();
             return NodeStmt{NodeStmtVar{varnode}};
         } else {

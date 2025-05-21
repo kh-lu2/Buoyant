@@ -51,4 +51,6 @@ error codes:
 8 -> syntax error
 9 -> double declaration
 10 -> no such variable name
+11 -> invalid return statement
+12 -> invalid var assign
 */
