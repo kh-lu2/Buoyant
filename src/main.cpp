@@ -53,4 +53,5 @@ error codes:
 10 -> no such variable name
 11 -> invalid return statement
 12 -> invalid var assign
+13 -> invalid statement
 */

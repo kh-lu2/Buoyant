@@ -46,30 +46,27 @@ private:
         return tokens[current + 1];
     }
 
-    optional<NodeExpr> parse_expr() {
+    NodeExpr parse_expr() {
         optional<Token> next_token = next();
         if (next_token.has_value() && next_token.value().type == TokenType::integer) {
             return NodeExpr{NodeExprInt{tokens[++current]}};
         } else if (next_token.has_value() &&  next_token.value().type == TokenType::identifier) {
             return NodeExpr{NodeExprIdent{tokens[++current]}};
         } else {
-            return {};
+            cerr << "Invalid expression\n";
+            exit(5);
         }
     };
 
-    optional<NodeStmt> parse_stmt() {
+    NodeStmt parse_stmt() {
         if (next().has_value() && next().value().type == TokenType::ret) {
             ++current;
             NodeStmtRet exitnode;
 
             if (next().has_value() && next().value().type == TokenType::assign_expr) {
                 ++current;
-                if (auto node_expr = parse_expr()) {
-                    exitnode.node_expr = node_expr.value();
-                } else {
-                    cerr << "Invalid expression\n";
-                    exit(5);
-                }
+                exitnode.node_expr = parse_expr();
+                
             } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
                 exitnode.node_expr = NodeExpr{NodeExprInt{TokenType::integer, "0"}};
                 current++;
@@ -77,7 +74,6 @@ private:
                 cerr << "Invalid return statement\n";
                 exit(11);
             }
-            look_for_stmt_end();
 
             return NodeStmt{NodeStmtRet{exitnode}};
         } else if (next().has_value() && next().value().type == TokenType::identifier) {
@@ -86,12 +82,7 @@ private:
             ++current;
             if (next().has_value() && next().value().type == TokenType::assign_expr) {
                 ++current;
-                if (auto node_expr = parse_expr()) {
-                    varnode.node_expr = node_expr.value();
-                } else {
-                    cerr << "Invalid expression\n";
-                    exit(5);
-                }
+                varnode.node_expr = parse_expr();
             } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
                 varnode.node_expr = NodeExpr{NodeExprInt{TokenType::integer, "0"}};
                 current++;
@@ -99,18 +90,21 @@ private:
                 cerr << "Invalid variable assignment\n";
                 exit(12);
             }
-
-            look_for_stmt_end();
             return NodeStmt{NodeStmtVar{varnode}};
         } else {
-            return {};
+            cerr << "Invalid statement\n";
+            exit(13);
         }
     };
 
-    void look_for_stmt_end() {
+    Token after_statement() {
         optional<Token> next_token = next();
-        if (next_token.has_value() && next_token.value().type == TokenType::stmt_end) {
+        if (next_token.has_value() && next_token.value().type == TokenType::stmt_begin_end) {
             current++;
+            return next_token.value();
+        } else if (next_token.has_value() && next_token.value().type == TokenType::stmt_middle) {
+            current++;
+            return next_token.value();
         } else {
             cerr << "Expected statement end\n";
             exit(6);
@@ -121,8 +115,12 @@ private:
         while (current < tokens.size()) {
             Token& token = tokens[current];
 
-            if (token.type == TokenType::stmt_begin) {
-                prog_node.stmts.push_back(parse_stmt().value());
+            if (token.type == TokenType::stmt_begin_end) {
+                Token separator = Token{TokenType::stmt_middle};
+                while (separator.type == TokenType::stmt_middle) {
+                    prog_node.stmts.push_back(parse_stmt());
+                    separator = after_statement();
+                }
             } else {
                 cerr << "Buoya doesn't understand that\n";
                 exit(8);

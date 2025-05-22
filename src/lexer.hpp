@@ -13,8 +13,8 @@ const string var_characters = "@#$%";
 enum class TokenType {
     ret,
     integer,
-    stmt_begin,
-    stmt_end,
+    stmt_begin_end,
+    stmt_middle,
     identifier,
     assign_zero,
     assign_expr
@@ -41,10 +41,10 @@ private:
             catch (std::invalid_argument const& ex) {
                 if (token == "&") {
                     tokens.push_back({TokenType::ret});
-                } else if (token == "(") {
-                    tokens.push_back({TokenType::stmt_begin});
-                } else if (token == ")") {
-                    tokens.push_back({TokenType::stmt_end});
+                } else if (token == ".") {
+                    tokens.push_back({TokenType::stmt_begin_end});
+                } else if (token == ",") {
+                    tokens.push_back({TokenType::stmt_middle});
                 } else if (token == "~") {
                     tokens.push_back({TokenType::assign_expr});
                 } else if (token == "~~") {
