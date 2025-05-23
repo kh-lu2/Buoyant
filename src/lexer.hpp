@@ -42,6 +42,10 @@ private:
                 tokens.push_back({TokenType::multiplication});
             } else if (token == ":") {
                 tokens.push_back({TokenType::division});
+            } else if (token == "(") {
+                tokens.push_back({TokenType::expr_start});
+            } else if (token == ")") {
+                tokens.push_back({TokenType::expr_end});
             } else {
                 for (auto &c: token) {
                     if (var_characters.find(c) == string::npos) {

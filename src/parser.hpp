@@ -43,23 +43,25 @@ private:
         }
     };
 
-    NodeExpr* parse_expr(int min_prec = 0) {
-        //NodeTerm* term = parse_term();
-        NodeTerm* term;
-        if (next(TokenType::integer)) {
-            NodeTermInt* node_term = new NodeTermInt;
-            node_term->token = tokens[++current];
-            term = node_term;
-        } else if (next(TokenType::identifier)) {
-            NodeTermIdent* node_term = new NodeTermIdent;
-            node_term->token = tokens[++current];
-            term = node_term;
+    void look_for_expr_end() {
+        if (next(TokenType::expr_end)) {
+            current++;
         } else {
-            cerr << "Invalid expression\n";
-            exit(5);
+            cerr << "No expression end\n";
+            exit(14);
         }
+    }
 
-        NodeExpr* expr_lhs = term;
+    NodeExpr* parse_expr(int min_prec = 0) {
+        NodeExpr* expr_lhs = new NodeTerm;
+
+        if (next(TokenType::expr_start)) {
+            current++;
+            expr_lhs = parse_expr();
+            look_for_expr_end();
+        } else {        
+            expr_lhs = parse_term();
+        }
 
         while (true) {
             optional<Token> current_token = try_next();

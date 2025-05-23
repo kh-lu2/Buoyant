@@ -20,7 +20,9 @@ enum class TokenType {
     addition,
     substraction,
     multiplication,
-    division
+    division,
+    expr_start,
+    expr_end
 };
 
 struct Token {

@@ -54,4 +54,5 @@ error codes:
 11 -> invalid return statement
 12 -> invalid var assign
 13 -> invalid statement
+14 -> no expression end
 */
