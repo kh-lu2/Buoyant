@@ -13,18 +13,21 @@ private:
     NodeProg prog_node;
     int current = 0;
 
-    optional<Token> next() {
+    optional<Token> try_next() {
         if (current + 1 >= tokens.size()) return {};
         return tokens[current + 1];
     }
 
+    bool next(TokenType type) {
+        return try_next().has_value() && try_next().value().type == type;
+    }
+
     NodeTerm* parse_term() {
-        optional<Token> next_token = next();
-        if (next_token.has_value() && next_token.value().type == TokenType::integer) {
+        if (next(TokenType::integer)) {
             NodeTermInt* node_term = new NodeTermInt;
             node_term->token = tokens[++current];
             return node_term;
-        } else if (next_token.has_value() &&  next_token.value().type == TokenType::identifier) {
+        } else if (next(TokenType::identifier)) {
             NodeTermIdent* node_term = new NodeTermIdent;
             node_term->token = tokens[++current];
             return node_term;
@@ -36,8 +39,7 @@ private:
 
     NodeExpr* parse_expr() {
         NodeTerm* term = parse_term();
-        optional<Token> next_token = next();
-        if (next_token.has_value() && next_token.value().type == TokenType::add) {
+        if (next(TokenType::add)) {
             NodeBinExprAdd* bin_expr = new NodeBinExprAdd;
             bin_expr->lhs = term;
             current++;
@@ -50,15 +52,15 @@ private:
     }
 
     NodeStmt* parse_stmt() {
-        if (next().has_value() && next().value().type == TokenType::ret) {
+        if (next(TokenType::ret)) {
             ++current;
             NodeStmtRet* exitnode = new NodeStmtRet;
 
-            if (next().has_value() && next().value().type == TokenType::assign_expr) {
+            if (next(TokenType::assign_expr)) {
                 ++current;
                 exitnode->node_expr = parse_expr();
                 
-            } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
+            } else if (next(TokenType::assign_zero)) {
                 NodeTermInt* node_term = new NodeTermInt;
                 node_term->token = {TokenType::integer, "0"};
                 exitnode->node_expr = node_term;
@@ -69,14 +71,14 @@ private:
             }
 
             return exitnode;
-        } else if (next().has_value() && next().value().type == TokenType::identifier) {
+        } else if (next(TokenType::identifier)) {
             NodeStmtVar* varnode = new NodeStmtVar;
-            varnode->ident = next().value();
+            varnode->ident = try_next().value();
             ++current;
-            if (next().has_value() && next().value().type == TokenType::assign_expr) {
+            if (next(TokenType::assign_expr)) {
                 ++current;
                 varnode->node_expr = parse_expr();
-            } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
+            } else if (next(TokenType::assign_zero)) {
                 NodeTermInt* node_term = new NodeTermInt;
                 node_term->token = {TokenType::integer, "0"};
                 varnode->node_expr = node_term;
@@ -93,11 +95,11 @@ private:
     };
 
     Token after_statement() {
-        optional<Token> next_token = next();
-        if (next_token.has_value() && next_token.value().type == TokenType::stmt_begin_end) {
+        optional<Token> next_token = try_next();
+        if (next(TokenType::stmt_begin_end)) {
             current++;
             return next_token.value();
-        } else if (next_token.has_value() && next_token.value().type == TokenType::stmt_middle) {
+        } else if (next(TokenType::stmt_middle)) {
             current++;
             return next_token.value();
         } else {
