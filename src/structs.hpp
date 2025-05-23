@@ -17,7 +17,10 @@ enum class TokenType {
     identifier,
     assign_zero,
     assign_expr,
-    add
+    addition,
+    substraction,
+    multiplication,
+    division
 };
 
 struct Token {
@@ -45,14 +48,23 @@ struct Stack {
 };
 
 struct NodeExpr {
-    virtual string generate(Stack& S) const {}
+    virtual string generate(Stack& S) const {};
     virtual ~NodeExpr() = default;
 };
 
 struct NodeBinExpr : NodeExpr {
     NodeExpr* lhs;
     NodeExpr* rhs;
-    virtual string generate(Stack& S) const {}
+    virtual string generate(Stack& S, string operation) const {
+        string assembly;
+        assembly += rhs->generate(S);
+        assembly += lhs->generate(S);
+        assembly += S.pop("rax");
+        assembly += S.pop("rbx");
+        assembly += operation;
+        assembly += S.push("rax");
+        return assembly;
+    };
     virtual ~NodeBinExpr() {
         delete lhs;
         delete rhs;
@@ -61,26 +73,35 @@ struct NodeBinExpr : NodeExpr {
 
 struct NodeBinExprAdd : NodeBinExpr {
     string generate(Stack& S) const {
-        string assembly;
-        assembly += lhs->generate(S);
-        assembly += rhs->generate(S);
-        assembly += S.pop("rax");
-        assembly += S.pop("rbx");
-        assembly += "    add rax, rbx\n";
-        assembly += S.push("rax");
-        return assembly;
+        return NodeBinExpr::generate(S, "    add rax, rbx\n");
     }
 };
-struct NodeBinExprMul : NodeBinExpr {};
+
+struct NodeBinExprSub : NodeBinExpr {
+    string generate(Stack& S) const {
+        return NodeBinExpr::generate(S, "    sub rax, rbx\n");
+    }
+};
+
+struct NodeBinExprMul : NodeBinExpr {
+    string generate(Stack& S) const {
+        return NodeBinExpr::generate(S, "    mul rbx\n");
+    }
+};
+
+struct NodeBinExprDiv : NodeBinExpr {
+    string generate(Stack& S) const {
+        return NodeBinExpr::generate(S, "    div rbx\n");
+    }
+};
 
 struct NodeTerm : NodeExpr {
     Token token;
-    virtual string generate(Stack& S) const {}
+    virtual string generate(Stack& S) const {};
     virtual ~NodeTerm() = default;
 };
 
 struct NodeTermInt : NodeTerm {
-    Token token;
     string generate(Stack& S) const {
         string assembly;
         assembly += "    mov rax, " + token.value.value() + "\n";
@@ -90,7 +111,6 @@ struct NodeTermInt : NodeTerm {
 };
 
 struct NodeTermIdent : NodeTerm {
-    Token token;
     string generate (Stack& S) const {
         if (!S.variables.contains(token.value.value())) {
             cerr << "No variable like that\n";
@@ -100,9 +120,13 @@ struct NodeTermIdent : NodeTerm {
     }
 };
 
+struct NodeTermParenExpr : NodeTerm {
+    
+};
+
 struct NodeStmt {
     NodeExpr* node_expr;
-    virtual string generate(Stack& S) const {}
+    virtual string generate(Stack& S) const {};
  
     virtual ~NodeStmt() {
         delete node_expr;

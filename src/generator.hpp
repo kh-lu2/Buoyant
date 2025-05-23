@@ -13,7 +13,7 @@ private:
         assembly = "global _start\n_start:\n";
 
         for (auto &NodeStmtPtr: root.stmts) {
-            assembly += NodeStmtPtr->generate(stack);
+            assembly += NodeStmtPtr->generate(stack) + "\n";
         }
 
         assembly += "    mov rax, 60\n";

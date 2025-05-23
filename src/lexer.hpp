@@ -35,7 +35,13 @@ private:
             } else if (token == "~~") {
                 tokens.push_back({TokenType::assign_zero});
             } else if (token == "+") {
-                tokens.push_back({TokenType::add});
+                tokens.push_back({TokenType::addition});
+            } else if (token == "-") {
+                tokens.push_back({TokenType::substraction});
+            } else if (token == "o") {
+                tokens.push_back({TokenType::multiplication});
+            } else if (token == ":") {
+                tokens.push_back({TokenType::division});
             } else {
                 for (auto &c: token) {
                     if (var_characters.find(c) == string::npos) {
