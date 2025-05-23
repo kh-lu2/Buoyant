@@ -73,29 +73,18 @@ private:
             int next_min_prec = curr_prec.value() + 1;
             NodeExpr* expr_rhs = parse_expr(next_min_prec);
 
-            NodeBinExpr* expr = new NodeBinExpr;
+            NodeBinExpr* expr;
 
-            if (type ==TokenType::addition) {
-                NodeBinExprAdd* add_expr = new NodeBinExprAdd;
-                add_expr->lhs = expr_lhs;
-                add_expr->rhs = expr_rhs;
-                expr = add_expr;
+            if (type == TokenType::addition) {
+                expr = new NodeBinExprAdd;
             } else if (type == TokenType::substraction) {
-                NodeBinExprSub* sub_expr = new NodeBinExprSub;
-                sub_expr->lhs = expr_lhs;
-                sub_expr->rhs = expr_rhs;
-                expr = sub_expr;
+                expr = new NodeBinExprSub;
             } else if (type == TokenType::multiplication) {
-                NodeBinExprMul* mul_expr = new NodeBinExprMul;
-                mul_expr->lhs = expr_lhs;
-                mul_expr->rhs = expr_rhs;
-                expr = mul_expr;
+                expr = new NodeBinExprMul;
             } else if (type == TokenType::division) {
-                NodeBinExprDiv* div_expr = new NodeBinExprDiv;
-                div_expr->lhs = expr_lhs;
-                div_expr->rhs = expr_rhs;
-                expr = div_expr;
+                expr = new NodeBinExprDiv;
             }
+
             expr->lhs = expr_lhs;
             expr->rhs = expr_rhs;
             
