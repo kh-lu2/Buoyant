@@ -52,14 +52,25 @@ struct NodeExpr {
 struct NodeBinExpr : NodeExpr {
     NodeExpr* lhs;
     NodeExpr* rhs;
-
+    virtual string generate(Stack& S) const {}
     virtual ~NodeBinExpr() {
         delete lhs;
         delete rhs;
     }
 };
 
-struct NodeBinExprAdd : NodeBinExpr {};
+struct NodeBinExprAdd : NodeBinExpr {
+    string generate(Stack& S) const {
+        string assembly;
+        assembly += lhs->generate(S);
+        assembly += rhs->generate(S);
+        assembly += S.pop("rax");
+        assembly += S.pop("rbx");
+        assembly += "    add rax, rbx\n";
+        assembly += S.push("rax");
+        return assembly;
+    }
+};
 struct NodeBinExprMul : NodeBinExpr {};
 
 struct NodeTerm : NodeExpr {
