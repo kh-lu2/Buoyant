@@ -16,7 +16,8 @@ enum class TokenType {
     stmt_middle,
     identifier,
     assign_zero,
-    assign_expr
+    assign_expr,
+    add
 };
 
 struct Token {
@@ -44,22 +45,41 @@ struct Stack {
 };
 
 struct NodeExpr {
-    Token token;
     virtual string generate(Stack& S) const {}
     virtual ~NodeExpr() = default;
 };
 
-struct NodeExprInt : NodeExpr {
+struct NodeBinExpr : NodeExpr {
+    NodeExpr* lhs;
+    NodeExpr* rhs;
+
+    virtual ~NodeBinExpr() {
+        delete lhs;
+        delete rhs;
+    }
+};
+
+struct NodeBinExprAdd : NodeBinExpr {};
+struct NodeBinExprMul : NodeBinExpr {};
+
+struct NodeTerm : NodeExpr {
+    Token token;
+    virtual string generate(Stack& S) const {}
+    virtual ~NodeTerm() = default;
+};
+
+struct NodeTermInt : NodeTerm {
+    Token token;
     string generate(Stack& S) const {
         string assembly;
         assembly += "    mov rax, " + token.value.value() + "\n";
         assembly += S.push("rax");
         return assembly;
     }
-
 };
 
-struct NodeExprIdent : NodeExpr {
+struct NodeTermIdent : NodeTerm {
+    Token token;
     string generate (Stack& S) const {
         if (!S.variables.contains(token.value.value())) {
             cerr << "No variable like that\n";

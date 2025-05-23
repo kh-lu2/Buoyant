@@ -18,21 +18,36 @@ private:
         return tokens[current + 1];
     }
 
-    NodeExpr* parse_expr() {
+    NodeTerm* parse_term() {
         optional<Token> next_token = next();
         if (next_token.has_value() && next_token.value().type == TokenType::integer) {
-            NodeExprInt* node_expr = new NodeExprInt;
-            node_expr->token = tokens[++current];
-            return node_expr;
+            NodeTermInt* node_term = new NodeTermInt;
+            node_term->token = tokens[++current];
+            return node_term;
         } else if (next_token.has_value() &&  next_token.value().type == TokenType::identifier) {
-            NodeExprIdent* node_expr = new NodeExprIdent;
-            node_expr->token = tokens[++current];
-            return node_expr;
+            NodeTermIdent* node_term = new NodeTermIdent;
+            node_term->token = tokens[++current];
+            return node_term;
         } else {
             cerr << "Invalid expression\n";
             exit(5);
         }
     };
+
+    NodeExpr* parse_expr() {
+        NodeTerm* term = parse_term();
+        optional<Token> next_token = next();
+        if (next_token.has_value() && next_token.value().type == TokenType::add) {
+            NodeBinExprAdd* bin_expr = new NodeBinExprAdd;
+            bin_expr->lhs = term;
+            current++;
+            NodeExpr* expr = parse_expr();
+            bin_expr->rhs = expr;
+            return bin_expr;
+        } else {
+            return term;
+        }
+    }
 
     NodeStmt* parse_stmt() {
         if (next().has_value() && next().value().type == TokenType::ret) {
@@ -44,9 +59,9 @@ private:
                 exitnode->node_expr = parse_expr();
                 
             } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
-                NodeExprInt* node_expr = new NodeExprInt;
-                node_expr->token = {TokenType::integer, "0"};
-                exitnode->node_expr = node_expr;
+                NodeTermInt* node_term = new NodeTermInt;
+                node_term->token = {TokenType::integer, "0"};
+                exitnode->node_expr = node_term;
                 current++;
             } else {
                 cerr << "Invalid return statement\n";
@@ -62,9 +77,9 @@ private:
                 ++current;
                 varnode->node_expr = parse_expr();
             } else if (next().has_value() && next().value().type == TokenType::assign_zero) {
-                NodeExprInt* node_expr = new NodeExprInt;
-                node_expr->token = {TokenType::integer, "0"};
-                varnode->node_expr = node_expr;
+                NodeTermInt* node_term = new NodeTermInt;
+                node_term->token = {TokenType::integer, "0"};
+                varnode->node_expr = node_term;
                 current++;
             } else {
                 cerr << "Invalid variable assignment\n";

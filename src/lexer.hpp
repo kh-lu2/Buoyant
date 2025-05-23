@@ -34,6 +34,8 @@ private:
                 tokens.push_back({TokenType::assign_expr});
             } else if (token == "~~") {
                 tokens.push_back({TokenType::assign_zero});
+            } else if (token == "+") {
+                tokens.push_back({TokenType::add});
             } else {
                 for (auto &c: token) {
                     if (var_characters.find(c) == string::npos) {
@@ -41,7 +43,7 @@ private:
                         exit(4);
                     }
                 }
-                 tokens.push_back({TokenType::identifier, token});
+                tokens.push_back({TokenType::identifier, token});
             }
         }
     }
