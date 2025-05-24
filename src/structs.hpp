@@ -167,8 +167,12 @@ struct NodeStmtExprVar : NodeStmtExpr {
     string generate(Stack& S) const {
         string name = ident.value.value();
         if (S.variables.contains(name)) {
-            cerr << "Double declaration\n";
-            exit(9);
+            string assembly;
+            assembly += node_expr->generate(S);
+            assembly += S.pop("rax");
+
+            assembly += "    mov [rsp + " + to_string((S.stack_ptr - S.variables[name].stack_index - 1) * 8) + "], rax\n";
+            return assembly;
         }
         S.variables[name] = Var{S.stack_ptr};
         S.variable_stack.push(name);
@@ -190,7 +194,7 @@ struct NodeScope : NodeStmt {
         int pop_count = S.variable_stack.size() - S.scope_starts.top();
         S.scope_starts.pop();
         assembly += "    add rsp, " + to_string(pop_count * 8) + "\n";
-        S.stack_ptr--;
+        S.stack_ptr -= pop_count;
 
         while (pop_count--) {
             S.variables.erase(S.variable_stack.top());
@@ -217,13 +221,16 @@ struct NodeStmtIf : NodeStmt {
         assembly += "    test rax, rax\n";
         assembly += "    jz " + label + "\n";
         assembly += scope->generate(S);
-        assembly += label + ":\n";
+
         if (after_if.has_value()) {
             string end_label = S.create_label();
+            assembly += "    jmp " + end_label + "\n";
+            assembly += label + ":\n";
             assembly += after_if.value()->generate(S, end_label);
             assembly += end_label + ":\n";
+        } else {
+            assembly += label + ":\n";
         }
-
         return assembly;
     }
 };
@@ -245,6 +252,8 @@ struct NodeAfterIfElif : NodeAfterIf {
         if (after_if.has_value()) {
             assembly += label + ":\n";
             assembly += after_if.value()->generate(S, end_label);
+        } else {
+            assembly += label + ":\n";
         }
         return assembly;
     }
