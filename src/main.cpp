@@ -57,4 +57,5 @@ error codes:
 14 -> no expression end
 15 -> no scope end
 16 -> expected statement start
+17 -> no if end
 */

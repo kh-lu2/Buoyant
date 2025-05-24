@@ -159,15 +159,28 @@ private:
         }
     }
 
+    void look_for_if_end() {
+        if (next(TokenType::if_end)) {
+            current++;
+        } else {
+            cerr << "No if end\n";
+            exit(17);
+        }
+    }
+
     void parse_stmts(NodeScope* scope) {
         if (next(TokenType::stmt_begin_end)) {
             current++;
             parse_group_stmt_expr(scope);
-        } else if (next(TokenType::if_end)) {
+        } else if (next(TokenType::if_start)) {
             current++;
+            NodeStmtIf* stmt_if = new NodeStmtIf;
+            stmt_if->node_expr = parse_expr();
+            look_for_if_end();
             NodeScope* new_scope = new NodeScope;
             parse_scope(new_scope);
-            scope->stmts.push_back(new_scope);
+            stmt_if->scope = new_scope;
+            scope->stmts.push_back(stmt_if);
         } else {
             cerr << "Buoya doesn't understand that\n";
             exit(8);

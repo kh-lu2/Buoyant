@@ -24,6 +24,7 @@ enum class TokenType {
     division,
     expr_start,
     expr_end,
+    if_start,
     if_end,
     scope_end
 };
@@ -39,6 +40,7 @@ struct Var {
 
 struct Stack {
     int stack_ptr = 0;
+    int label_cnt = 0;
     unordered_map<string, Var> variables;
     stack<string> variable_stack;
     stack<int> scope_starts;
@@ -52,6 +54,10 @@ struct Stack {
         stack_ptr--;
         return "    pop " + reg + "\n";
     }    
+
+    string create_label() {
+        return "label" + to_string(label_cnt++);
+    }
 };
 
 struct NodeExpr {
@@ -187,6 +193,22 @@ struct NodeScope : NodeStmt {
             S.variables.erase(S.variable_stack.top());
             S.variable_stack.pop();
         }
+        return assembly;
+    }
+};
+
+struct NodeStmtIf : NodeStmt {
+    NodeExpr* node_expr;
+    NodeScope* scope;
+    string generate(Stack& S) const {
+        string assembly;
+        assembly += node_expr->generate(S);
+        assembly += S.pop("rax");
+        string label = S.create_label();
+        assembly += "    test rax, rax\n";
+        assembly += "    jz " + label + "\n";
+        assembly += scope->generate(S);
+        assembly += label + ":\n";
         return assembly;
     }
 };
