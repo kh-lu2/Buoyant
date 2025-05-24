@@ -38,7 +38,7 @@ private:
             node_term->token = tokens[++current];
             return node_term;
         } else {
-            cerr << "Invalid expression\n";
+            cerr << "Invalid term in an expression\n";
             exit(5);
         }
     };
@@ -47,7 +47,7 @@ private:
         if (next(TokenType::expr_end)) {
             current++;
         } else {
-            cerr << "No expression end\n";
+            cerr << "Expected expression end\n";
             exit(14);
         }
     }
@@ -163,7 +163,7 @@ private:
         if (next(TokenType::if_end)) {
             current++;
         } else {
-            cerr << "No if end\n";
+            cerr << "Expected if end\n";
             exit(17);
         }
     }
@@ -172,8 +172,8 @@ private:
         if (next(TokenType::elif_end)) {
             current++;
         } else {
-            cerr << "No elif end\n";
-            exit(17);
+            cerr << "Expected elif end\n";
+            exit(18);
         }
     }
 
@@ -187,8 +187,8 @@ private:
             parse_scope(new_scope);
             after_if_else->scope = new_scope;
             if (!(tokens[current].type == TokenType::scope_end)) {
-                cerr << "No else end\n";
-                exit(17);
+                cerr << "Expected else end\n";
+                exit(19);
             }
             return after_if_else;
         } else if (tokens[current].type == TokenType::elif_start) {
@@ -201,8 +201,8 @@ private:
             after_if_elif->after_if = parse_after_if();
             return after_if_elif;
         } else {
-            cerr << "sth wrong\n";
-            exit(17);
+            cerr << "Invalid end of if\n";
+            exit(20);
         }
     }
 
@@ -222,7 +222,7 @@ private:
 
             scope->stmts.push_back(stmt_if);
         } else {
-            cerr << "Buoya doesn't understand that\n";
+            cerr << "Expected statement begin\n";
             exit(8);
         }
     }
@@ -231,7 +231,7 @@ private:
         if (next(TokenType::scope_end) || next(TokenType::elif_start) || next(TokenType::els)) {
             current++;
         } else {
-            cerr << "No scope end\n";
+            cerr << "Expected scope end\n";
             exit(15);
         }
     }

@@ -13,13 +13,13 @@ using filesystem::path;
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cerr << "Wrong usage. Should be: buoyant <source.bya>\n";
+        cerr << "Wrong usage, should be: buoyant <source.bya>\n";
         return 1;
     }
 
     path filepath(argv[1]);
     if (filepath.extension() != ".bya") {
-        cerr << "Wrong file extention! Should be .bya\n";
+        cerr << "Wrong file extention, should be .bya\n";
         return 2;
     }
 
@@ -45,17 +45,19 @@ error codes:
 2 -> wrong file extention
 3 -> ifstream failed
 4 -> syntax buoya doesnt support (lexer)
-5 -> invalid expression (parser)
-6 -> no statement end
-7 -> no statement after statement begin
-8 -> syntax error
-9 -> double declaration
-10 -> no such variable name
-11 -> invalid return statement
-12 -> invalid var assign
-13 -> invalid statement
-14 -> no expression end
-15 -> no scope end
-16 -> expected statement start
-17 -> no if end
+5 -> Invalid term in an expression (parser)
+6 -> Expected statement end (parser)
+
+8 -> Expected statement begin (parser)
+
+10 -> No variable like that (generator)
+11 -> invalid return statement (parser)
+12 -> invalid var assign (parser)
+13 -> invalid statement (parser)
+14 -> no expression end (parser)
+15 -> no scope end (parser)
+17 -> no if end (parser)
+18 -> expected elif end (parser)
+19 -> no else end (parser)
+20 -> Invalid end of if (unreachable?)
 */

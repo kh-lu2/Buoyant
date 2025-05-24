@@ -73,7 +73,7 @@ private:
 public:
     Lexer(path filepath) : source_file(filepath) {
         if (source_file.fail()) {
-            cerr << "Something wrong with file or filepath...\n";
+            cerr << "Something wrong with file or filepath\n";
             exit(3);
         }
         tokenize();
