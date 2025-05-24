@@ -167,6 +167,7 @@ private:
             current++;
             NodeScope* new_scope = new NodeScope;
             parse_scope(new_scope);
+            scope->stmts.push_back(new_scope);
         } else {
             cerr << "Buoya doesn't understand that\n";
             exit(8);

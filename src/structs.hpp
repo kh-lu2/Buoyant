@@ -180,7 +180,7 @@ struct NodeScope : NodeStmt {
         
         int pop_count = S.variable_stack.size() - S.scope_starts.top();
         S.scope_starts.pop();
-        assembly += "    add rsp, " + to_string(pop_count * 8) + "\n\n";
+        assembly += "    add rsp, " + to_string(pop_count * 8) + "\n";
         S.stack_ptr--;
 
         while (pop_count--) {
