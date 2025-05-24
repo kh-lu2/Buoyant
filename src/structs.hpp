@@ -26,6 +26,9 @@ enum class TokenType {
     expr_end,
     if_start,
     if_end,
+    elif_start,
+    elif_end,
+    els,
     scope_end
 };
 
@@ -197,9 +200,15 @@ struct NodeScope : NodeStmt {
     }
 };
 
+struct NodeAfterIf {
+    virtual string generate(Stack &S, string end_label) const {}
+    virtual ~NodeAfterIf() = default;
+};
+
 struct NodeStmtIf : NodeStmt {
     NodeExpr* node_expr;
     NodeScope* scope;
+    optional<NodeAfterIf*> after_if;
     string generate(Stack& S) const {
         string assembly;
         assembly += node_expr->generate(S);
@@ -209,6 +218,43 @@ struct NodeStmtIf : NodeStmt {
         assembly += "    jz " + label + "\n";
         assembly += scope->generate(S);
         assembly += label + ":\n";
+        if (after_if.has_value()) {
+            string end_label = S.create_label();
+            assembly += after_if.value()->generate(S, end_label);
+            assembly += end_label + ":\n";
+        }
+
+        return assembly;
+    }
+};
+
+struct NodeAfterIfElif : NodeAfterIf {
+    NodeExpr* node_expr;
+    NodeScope* scope;
+    optional<NodeAfterIf*> after_if; 
+
+    string generate(Stack& S, string end_label) const {
+        string assembly;
+        assembly += node_expr->generate(S);
+        assembly += S.pop("rax");
+        string label = S.create_label();
+        assembly += "    test rax, rax\n";
+        assembly += "    jz " + label + "\n";
+        assembly += scope->generate(S);
+        assembly += "    jmp " + end_label + "\n";
+        if (after_if.has_value()) {
+            assembly += label + ":\n";
+            assembly += after_if.value()->generate(S, end_label);
+        }
+        return assembly;
+    }
+};
+
+struct NodeAfterIfElse : NodeAfterIf {
+    NodeScope* scope;
+    string generate(Stack& S, string end_label) const {
+        string assembly;
+        assembly += scope->generate(S);
         return assembly;
     }
 };

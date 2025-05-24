@@ -168,6 +168,44 @@ private:
         }
     }
 
+    void look_for_elif_end() {
+        if (next(TokenType::elif_end)) {
+            current++;
+        } else {
+            cerr << "No elif end\n";
+            exit(17);
+        }
+    }
+
+
+    optional<NodeAfterIf*> parse_after_if() {
+        if (tokens[current].type == TokenType::scope_end) {
+            return {};
+        } else if (tokens[current].type == TokenType::els) {
+            NodeAfterIfElse* after_if_else = new NodeAfterIfElse;
+            NodeScope* new_scope = new NodeScope;
+            parse_scope(new_scope);
+            after_if_else->scope = new_scope;
+            if (!(tokens[current].type == TokenType::scope_end)) {
+                cerr << "No else end\n";
+                exit(17);
+            }
+            return after_if_else;
+        } else if (tokens[current].type == TokenType::elif_start) {
+            NodeAfterIfElif* after_if_elif = new NodeAfterIfElif;
+            after_if_elif->node_expr = parse_expr();
+            look_for_elif_end();
+            NodeScope* new_scope = new NodeScope;
+            parse_scope(new_scope);
+            after_if_elif->scope = new_scope;
+            after_if_elif->after_if = parse_after_if();
+            return after_if_elif;
+        } else {
+            cerr << "sth wrong\n";
+            exit(17);
+        }
+    }
+
     void parse_stmts(NodeScope* scope) {
         if (next(TokenType::stmt_begin_end)) {
             current++;
@@ -180,6 +218,8 @@ private:
             NodeScope* new_scope = new NodeScope;
             parse_scope(new_scope);
             stmt_if->scope = new_scope;
+            stmt_if->after_if = parse_after_if();
+
             scope->stmts.push_back(stmt_if);
         } else {
             cerr << "Buoya doesn't understand that\n";
@@ -188,7 +228,7 @@ private:
     }
 
     void look_for_scope_end() {
-        if (next(TokenType::scope_end)) {
+        if (next(TokenType::scope_end) || next(TokenType::elif_start) || next(TokenType::els)) {
             current++;
         } else {
             cerr << "No scope end\n";
@@ -197,7 +237,7 @@ private:
     }
 
     void parse_scope(NodeScope* scope) {
-        while (try_next().has_value() && !next(TokenType::scope_end)) {
+        while (try_next().has_value() && !next(TokenType::scope_end) && !next(TokenType::elif_start) && !next(TokenType::els)) {
             parse_stmts(scope);
         }
         look_for_scope_end();

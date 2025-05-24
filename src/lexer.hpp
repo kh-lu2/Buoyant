@@ -50,6 +50,12 @@ private:
                 tokens.push_back({TokenType::if_start});
             } else if (token == "]") {
                 tokens.push_back({TokenType::if_end});
+            } else if (token == "{") {
+                tokens.push_back({TokenType::elif_start});
+            } else if (token == "}") {
+                tokens.push_back({TokenType::elif_end});
+            } else if (token == "!") {
+                tokens.push_back({TokenType::els});
             } else if (token == "^") {
                 tokens.push_back({TokenType::scope_end});
             } else {
