@@ -44,20 +44,24 @@ error codes:
 1 -> wrong usage
 2 -> wrong file extention
 3 -> ifstream failed
+
+
 4 -> syntax buoya doesnt support (lexer)
-5 -> Invalid term in an expression (parser)
+
+
 6 -> Expected statement end (parser)
-
 8 -> Expected statement begin (parser)
-
-10 -> No variable like that (generator)
+5 -> Invalid term in an expression (parser)
 11 -> invalid return statement (parser)
 12 -> invalid var assign (parser)
 13 -> invalid statement (parser)
+
 14 -> no expression end (parser)
-15 -> no scope end (parser)
 17 -> no if end (parser)
 18 -> expected elif end (parser)
 19 -> no else end (parser)
+15 -> no scope end (parser)
+
+10 -> No variable like that (generator)
 20 -> Invalid end of if (unreachable?)
 */
