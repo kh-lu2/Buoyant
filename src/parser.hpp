@@ -10,8 +10,8 @@ using namespace std;
 class Parser {
 private:
     vector<Token> tokens;
-    NodeProg prog_node;
-    int current = 0;
+    NodeProg* prog_node = new NodeProg;
+    int current = -1;
 
     optional<int> prec(TokenType type) {
         if (type == TokenType::addition || type == TokenType::substraction) return 0;
@@ -94,10 +94,10 @@ private:
         return expr_lhs;
     }
 
-    NodeStmt* parse_stmt() {
+    NodeStmt* parse_stmt_expr() {
         if (next(TokenType::ret)) {
             ++current;
-            NodeStmtRet* exitnode = new NodeStmtRet;
+            NodeStmtExprRet* exitnode = new NodeStmtExprRet;
 
             if (next(TokenType::assign_expr)) {
                 ++current;
@@ -115,7 +115,7 @@ private:
 
             return exitnode;
         } else if (next(TokenType::identifier)) {
-            NodeStmtVar* varnode = new NodeStmtVar;
+            NodeStmtExprVar* varnode = new NodeStmtExprVar;
             varnode->ident = try_next().value();
             ++current;
             if (next(TokenType::assign_expr)) {
@@ -151,34 +151,62 @@ private:
         }
     };
 
-    void parse() {
-        while (current < tokens.size()) {
-            Token& token = tokens[current];
-
-            if (token.type == TokenType::stmt_begin_end) {
-                Token separator = Token{TokenType::stmt_middle};
-                while (separator.type == TokenType::stmt_middle) {
-                    prog_node.stmts.push_back(parse_stmt());
-                    separator = after_statement();
-                }
-            } else {
-                cerr << "Buoya doesn't understand that\n";
-                exit(8);
-            }
-            current++;
+    void parse_group_stmt_expr(NodeScope* scope) {
+        Token separator = Token{TokenType::stmt_middle};
+        while (separator.type == TokenType::stmt_middle) {
+            scope->stmts.push_back(parse_stmt_expr());
+            separator = after_statement();
         }
     }
+
+    void parse_stmts(NodeScope* scope) {
+        if (next(TokenType::stmt_begin_end)) {
+            current++;
+            parse_group_stmt_expr(scope);
+        } else if (next(TokenType::if_end)) {
+            current++;
+            NodeScope* new_scope = new NodeScope;
+            parse_scope(new_scope);
+        } else {
+            cerr << "Buoya doesn't understand that\n";
+            exit(8);
+        }
+    }
+
+    void look_for_scope_end() {
+        if (next(TokenType::scope_end)) {
+            current++;
+        } else {
+            cerr << "No scope end\n";
+            exit(15);
+        }
+    }
+
+    void parse_scope(NodeScope* scope) {
+        while (try_next().has_value() && !next(TokenType::scope_end)) {
+            parse_stmts(scope);
+        }
+        look_for_scope_end();
+    }
+
+    void parse(NodeScope* scope) {
+        while (try_next().has_value()) {
+            parse_stmts(scope);
+        }
+    }
+
+
 public:
     Parser(vector<Token> tokens) :tokens(tokens) {
-        parse();
+        parse(prog_node);
     } 
 
     NodeProg get_node_prog() {
-        return prog_node;
+        return *prog_node;
     }
 
     ~Parser() {
-        for (auto &stmt: prog_node.stmts) {
+        for (auto &stmt: prog_node->stmts) {
             delete stmt;
         }
     }

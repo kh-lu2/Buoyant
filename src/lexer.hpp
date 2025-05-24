@@ -46,6 +46,10 @@ private:
                 tokens.push_back({TokenType::expr_start});
             } else if (token == ")") {
                 tokens.push_back({TokenType::expr_end});
+            } else if (token == "]") {
+                tokens.push_back({TokenType::if_end});
+            } else if (token == "^") {
+                tokens.push_back({TokenType::scope_end});
             } else {
                 for (auto &c: token) {
                     if (var_characters.find(c) == string::npos) {

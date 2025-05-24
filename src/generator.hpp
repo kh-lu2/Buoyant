@@ -10,15 +10,7 @@ private:
     Stack stack;
 
     void gen_prog() {
-        assembly = "global _start\n_start:\n";
-
-        for (auto &NodeStmtPtr: root.stmts) {
-            assembly += NodeStmtPtr->generate(stack) + "\n";
-        }
-
-        assembly += "    mov rax, 60\n";
-        assembly += "    mov rdi, 0\n";
-        assembly += "    syscall\n";
+        assembly = root.generate(stack);
     }
 
 public:

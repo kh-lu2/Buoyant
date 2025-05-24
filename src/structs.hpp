@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <stack>
 
 using namespace std;
 
@@ -22,7 +23,9 @@ enum class TokenType {
     multiplication,
     division,
     expr_start,
-    expr_end
+    expr_end,
+    if_end,
+    scope_end
 };
 
 struct Token {
@@ -37,6 +40,8 @@ struct Var {
 struct Stack {
     int stack_ptr = 0;
     unordered_map<string, Var> variables;
+    stack<string> variable_stack;
+    stack<int> scope_starts;
 
     string push(const string& reg) {
         stack_ptr++;
@@ -122,20 +127,22 @@ struct NodeTermIdent : NodeTerm {
     }
 };
 
-struct NodeTermParenExpr : NodeTerm {
-    
-};
 
 struct NodeStmt {
+    virtual string generate(Stack& S) const {};
+    virtual ~NodeStmt() = default;
+};
+
+struct NodeStmtExpr : NodeStmt {
     NodeExpr* node_expr;
     virtual string generate(Stack& S) const {};
  
-    virtual ~NodeStmt() {
+    virtual ~NodeStmtExpr() {
         delete node_expr;
     };
 };
 
-struct NodeStmtRet : NodeStmt {
+struct NodeStmtExprRet : NodeStmtExpr {
     string generate(Stack& S) const {
         string assembly;
         assembly += node_expr->generate(S);
@@ -146,18 +153,52 @@ struct NodeStmtRet : NodeStmt {
     }
 };
 
-struct NodeStmtVar : NodeStmt {
+struct NodeStmtExprVar : NodeStmtExpr {
     Token ident;
     string generate(Stack& S) const {
-        if (S.variables.contains(ident.value.value())) {
+        string name = ident.value.value();
+        if (S.variables.contains(name)) {
             cerr << "Double declaration\n";
             exit(9);
         }
-        S.variables[ident.value.value()] = Var{S.stack_ptr};
+        S.variables[name] = Var{S.stack_ptr};
+        S.variable_stack.push(name);
         return node_expr->generate(S);
     }
 };
 
-struct NodeProg {
+struct NodeScope : NodeStmt {
     vector<NodeStmt*> stmts;
+
+    virtual string generate(Stack& S) const {
+        string assembly;
+        S.scope_starts.push(S.variables.size());
+
+        for (auto &StmtPtr: stmts) {
+            assembly += StmtPtr->generate(S) + "\n";
+        }
+        
+        int pop_count = S.variable_stack.size() - S.scope_starts.top();
+        S.scope_starts.pop();
+        assembly += "    add rsp, " + to_string(pop_count * 8) + "\n\n";
+        S.stack_ptr--;
+
+        while (pop_count--) {
+            S.variables.erase(S.variable_stack.top());
+            S.variable_stack.pop();
+        }
+        return assembly;
+    }
+};
+
+struct NodeProg : NodeScope {
+    string generate(Stack& S) const {
+        string assembly;
+        assembly += "global _start\n_start:\n";
+        assembly += NodeScope::generate(S);
+        assembly += "    mov rax, 60\n";
+        assembly += "    mov rdi, 0\n";
+        assembly += "    syscall\n";
+        return assembly;
+    }
 };
