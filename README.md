@@ -19,7 +19,7 @@ $$$$
 ```
 ### Expression
 Expressions are anything that can be evaluated to a number. They are made of 0 or more mathematical operations: addition(`+`), substraction(`-`), multiplication(`o`) and division(`:`). The first two are of a lesser precedence the second two. You can use `()`, too. Expressions use numbers as well as variables.
-> **Note**: before variables can be used in expressions, they must have been [assigned a value](#simple-statements). 
+> **Note**: before variables can be used in expressions, they must have been [assigned a value](#simple-statement). 
 
 Examples:
 ```
@@ -33,7 +33,7 @@ A program in Buoya is basically a list of statements. There are two types of sta
 Simple statements are responsible for assigning values to variables. The basic syntax for a simple statement is:
 `. variable ~ expression .`
 If you want to assign zero, you can write:
-`. variable ~~ .`\
+`. variable ~~ .`
 > **Important!** In Buoya, there is a special variable called `&`. If you assign something to this variable, your program will exit with exit code equal to the assigned expression.
 
 You can join simple statements by putting a `,` between them:\
