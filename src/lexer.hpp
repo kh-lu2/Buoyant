@@ -19,8 +19,8 @@ private:
     string source_file;
     vector<Token> tokens;
     int current = -1;
-    int curr_line = 0;
-    int curr_pos = -1;
+    int curr_line = 1;
+    int curr_pos = 0;
 
     optional<char> try_next() {
         if (current + 1 >= source_file.size()) return {};
@@ -102,25 +102,28 @@ private:
             } else if (isdigit(c)) {
                 string number {c};
                 go_forward();
+                int num_pos = curr_pos;
                 optional<char> c = try_next();
                 while (c.has_value() && isdigit(c.value())) {
                     number += {c.value()};
                     go_forward();
                     c = try_next();
                 }
-                tokens.push_back({TokenType::integer, curr_line, curr_pos, number});                
+                tokens.push_back({TokenType::integer, curr_line, num_pos, number});                
             } else if (var_characters.find(c) != string::npos) {
                 string var_name {c};
                 go_forward();
+                int var_pos = curr_pos;
                 optional<char> c = try_next();
                 while (c.has_value() && var_characters.find(c.value()) != string::npos) {
                     var_name += {c.value()};
                     go_forward();
                     c = try_next();
                 }
-                tokens.push_back({TokenType::identifier, curr_line, curr_pos, var_name});
+                tokens.push_back({TokenType::identifier, curr_line, var_pos, var_name});
             } else {
-                cerr << "Buoya does not support that\n";
+                cerr << "Buoya does not support that at line " + to_string(curr_line) +
+                " and position " + to_string(curr_pos) + "\n";
                 exit(10);
             }
         }

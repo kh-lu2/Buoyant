@@ -37,6 +37,10 @@ struct Token {
     int line;
     int position;
     optional<string> value;
+
+    string location(int offset = 0) const {
+        return "at line " + to_string(line) + " and position " + to_string(position + offset);
+    }
 };
 
 struct Var {
@@ -131,7 +135,7 @@ struct NodeTermInt : NodeTerm {
 struct NodeTermIdent : NodeTerm {
     string generate (Stack& S) const {
         if (!S.variables.contains(token.value.value())) {
-            cerr << "No variable like that\n";
+            cerr << "No variable like that " + token.location() + "\n";
             exit(30);
         }
         return S.push("qword [rsp + " + to_string((S.stack_ptr - S.variables[token.value.value()].stack_index - 1) * 8) + "]");

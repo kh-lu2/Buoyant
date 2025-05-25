@@ -27,6 +27,12 @@ private:
     bool next(TokenType type) {
         return try_next().has_value() && try_next()->type == type;
     }
+    string get_location() {
+        if (try_next().has_value()) {
+            return try_next().value().location();
+        }
+        return tokens[current].location(1);
+    }
 
     NodeTerm* parse_term() {
         if (next(TokenType::integer)) {
@@ -38,7 +44,7 @@ private:
             node_term->token = tokens[++current];
             return node_term;
         } else {
-            cerr << "Invalid term in an expression\n";
+            cerr << "Invalid term in an expression " + get_location() + "\n";
             exit(24);
         }
     };
@@ -47,7 +53,7 @@ private:
         if (next(type)) {
             current++;
         } else {
-            cerr << "Expected " + token_name + " end\n";
+            cerr << "Expected " + token_name + " end " + get_location() + "\n";
             exit(22);
         }
     }
@@ -105,7 +111,7 @@ private:
             node_stmt_expr->node_expr = node_term;
             current++;
         } else {
-            cerr << "Invalid " + stmt_name + "\n";
+            cerr << "Invalid " + stmt_name + " " + get_location() + "\n";
             exit(26);
         }
     }
@@ -123,7 +129,7 @@ private:
             assign(varnode, "variable assignment");
             return varnode;
         } else {
-            cerr << "Invalid statement\n";
+            cerr << "Invalid statement " + get_location() + "\n";
             exit(25);
         }
     };
@@ -134,7 +140,7 @@ private:
             current++;
             return next_token.value().type;
         } else {
-            cerr << "Expected statement end\n";
+            cerr << "Expected statement end " + get_location() + "\n";
             exit(21);
         }
     };
@@ -182,7 +188,7 @@ private:
             
             return {stmt_if};
         } else {
-            cerr << "Expected statement begin\n";
+            cerr << "Expected statement begin " + get_location() + "\n";
             exit(20);
         }
     }
@@ -193,7 +199,7 @@ private:
             current++;
             return next_token.value().type;
         } else {
-            cerr << "Expected scope end\n";
+            cerr << "Expected scope end " + get_location() + "\n";
             exit(23);
         }
     }
