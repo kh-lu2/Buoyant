@@ -38,8 +38,12 @@ struct Token {
     int position;
     optional<string> value;
 
-    string location(int offset = 0) const {
-        return "at line " + to_string(line) + " and position " + to_string(position + offset);
+    string location(bool end = 1) const {
+        int new_pos = position;
+        if (end) {
+            new_pos += (value.has_value() ? value.value().size() : 1);
+        }
+        return "at line " + to_string(line) + " and position " + to_string(new_pos);
     }
 };
 

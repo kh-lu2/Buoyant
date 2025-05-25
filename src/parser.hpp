@@ -28,9 +28,6 @@ private:
         return try_next().has_value() && try_next()->type == type;
     }
     string get_location() {
-        if (try_next().has_value()) {
-            return try_next().value().location();
-        }
         return tokens[current].location(1);
     }
 
