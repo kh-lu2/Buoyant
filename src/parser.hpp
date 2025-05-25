@@ -101,7 +101,7 @@ private:
                 
         } else if (next(TokenType::assign_zero)) {
             NodeTermInt* node_term = new NodeTermInt;
-            node_term->token = {TokenType::integer, "0"};
+            node_term->token = {TokenType::integer, -1, -1, "0"};
             node_stmt_expr->node_expr = node_term;
             current++;
         } else {

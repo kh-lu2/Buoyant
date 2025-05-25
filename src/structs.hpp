@@ -34,6 +34,8 @@ enum class TokenType {
 
 struct Token {
     TokenType type;
+    int line;
+    int position;
     optional<string> value;
 };
 
