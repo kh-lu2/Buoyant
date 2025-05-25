@@ -130,7 +130,7 @@ struct NodeTermIdent : NodeTerm {
     string generate (Stack& S) const {
         if (!S.variables.contains(token.value.value())) {
             cerr << "No variable like that\n";
-            exit(10);
+            exit(30);
         }
         return S.push("qword [rsp + " + to_string((S.stack_ptr - S.variables[token.value.value()].stack_index - 1) * 8) + "]");
     }

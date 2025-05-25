@@ -62,7 +62,7 @@ private:
                 for (auto &c: token) {
                     if (var_characters.find(c) == string::npos) {
                         cerr << "Buoya does not support that\n";
-                        exit(4);
+                        exit(10);
                     }
                 }
                 tokens.push_back({TokenType::identifier, token});

@@ -45,23 +45,15 @@ error codes:
 2 -> wrong file extention
 3 -> ifstream failed
 
+10 -> syntax buoya doesnt support (lexer)
 
-4 -> syntax buoya doesnt support (lexer)
+20 -> Expected statement begin (parser)
+21 -> Expected statement end (parser)
+22 -> expected ..... end (parser)
+23 -> expected scope end (parser)
+24 -> Invalid term in an expression (parser)
+25 -> invalid statement (parser)
+26 -> invalid ....... statement (parser)
 
-
-6 -> Expected statement end (parser)
-8 -> Expected statement begin (parser)
-5 -> Invalid term in an expression (parser)
-11 -> invalid return statement (parser)
-12 -> invalid var assign (parser)
-13 -> invalid statement (parser)
-
-14 -> no expression end (parser)
-17 -> no if end (parser)
-18 -> expected elif end (parser)
-19 -> no else end (parser)
-15 -> no scope end (parser)
-
-10 -> No variable like that (generator)
-20 -> Invalid end of if (unreachable?)
+30 -> No variable like that (generator)
 */

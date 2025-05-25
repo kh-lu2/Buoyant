@@ -10,7 +10,7 @@ using namespace std;
 class Parser {
 private:
     vector<Token> tokens;
-    NodeProg* prog_node = new NodeProg;
+    NodeProg* prog_node;
     int current = -1;
 
     optional<int> prec(TokenType type) {
@@ -39,16 +39,16 @@ private:
             return node_term;
         } else {
             cerr << "Invalid term in an expression\n";
-            exit(5);
+            exit(24);
         }
     };
 
-    void look_for_expr_end() {
-        if (next(TokenType::expr_end)) {
+    void look_for(TokenType type, string token_name) {
+        if (next(type)) {
             current++;
         } else {
-            cerr << "Expected expression end\n";
-            exit(14);
+            cerr << "Expected " + token_name + " end\n";
+            exit(22);
         }
     }
 
@@ -58,7 +58,7 @@ private:
         if (next(TokenType::expr_start)) {
             current++;
             expr_lhs = parse_expr();
-            look_for_expr_end();
+            look_for(TokenType::expr_end, "expression");
         } else {        
             expr_lhs = parse_term();
         }
@@ -94,165 +94,136 @@ private:
         return expr_lhs;
     }
 
-    NodeStmt* parse_stmt_expr() {
+    void assign(NodeStmtExpr* node_stmt_expr, string stmt_name) {
+        if (next(TokenType::assign_expr)) {
+            ++current;
+            node_stmt_expr->node_expr = parse_expr();
+                
+        } else if (next(TokenType::assign_zero)) {
+            NodeTermInt* node_term = new NodeTermInt;
+            node_term->token = {TokenType::integer, "0"};
+            node_stmt_expr->node_expr = node_term;
+            current++;
+        } else {
+            cerr << "Invalid " + stmt_name + "\n";
+            exit(26);
+        }
+    }
+
+    NodeStmtExpr* parse_stmt_expr() {
         if (next(TokenType::ret)) {
             ++current;
             NodeStmtExprRet* exitnode = new NodeStmtExprRet;
-
-            if (next(TokenType::assign_expr)) {
-                ++current;
-                exitnode->node_expr = parse_expr();
-                
-            } else if (next(TokenType::assign_zero)) {
-                NodeTermInt* node_term = new NodeTermInt;
-                node_term->token = {TokenType::integer, "0"};
-                exitnode->node_expr = node_term;
-                current++;
-            } else {
-                cerr << "Invalid return statement\n";
-                exit(11);
-            }
-
+            assign(exitnode, "return statement");
             return exitnode;
         } else if (next(TokenType::identifier)) {
             NodeStmtExprVar* varnode = new NodeStmtExprVar;
             varnode->ident = try_next().value();
             ++current;
-            if (next(TokenType::assign_expr)) {
-                ++current;
-                varnode->node_expr = parse_expr();
-            } else if (next(TokenType::assign_zero)) {
-                NodeTermInt* node_term = new NodeTermInt;
-                node_term->token = {TokenType::integer, "0"};
-                varnode->node_expr = node_term;
-                current++;
-            } else {
-                cerr << "Invalid variable assignment\n";
-                exit(12);
-            }
+            assign(varnode, "variable assignment");
             return varnode;
         } else {
             cerr << "Invalid statement\n";
-            exit(13);
+            exit(25);
         }
     };
 
-    Token after_statement() {
+    TokenType after_statement() {
         optional<Token> next_token = try_next();
-        if (next(TokenType::stmt_begin_end)) {
+        if (next(TokenType::stmt_begin_end) || next(TokenType::stmt_middle)) {
             current++;
-            return next_token.value();
-        } else if (next(TokenType::stmt_middle)) {
-            current++;
-            return next_token.value();
+            return next_token.value().type;
         } else {
             cerr << "Expected statement end\n";
-            exit(6);
+            exit(21);
         }
     };
 
-    void parse_group_stmt_expr(NodeScope* scope) {
-        Token separator = Token{TokenType::stmt_middle};
-        while (separator.type == TokenType::stmt_middle) {
-            scope->stmts.push_back(parse_stmt_expr());
+    vector<NodeStmt*> parse_group_stmt_expr() {
+        vector<NodeStmt*> stmts_expr;
+        TokenType separator = TokenType::stmt_middle;
+        while (separator == TokenType::stmt_middle) {
+            stmts_expr.push_back(parse_stmt_expr());
             separator = after_statement();
         }
+        return stmts_expr;
     }
-
-    void look_for_if_end() {
-        if (next(TokenType::if_end)) {
-            current++;
-        } else {
-            cerr << "Expected if end\n";
-            exit(17);
-        }
-    }
-
-    void look_for_elif_end() {
-        if (next(TokenType::elif_end)) {
-            current++;
-        } else {
-            cerr << "Expected elif end\n";
-            exit(18);
-        }
-    }
-
 
     optional<NodeAfterIf*> parse_after_if() {
-        if (tokens[current].type == TokenType::scope_end) {
+        TokenType type = after_scope();
+        if (type == TokenType::scope_end) {
             return {};
-        } else if (tokens[current].type == TokenType::els) {
+        } else if (type == TokenType::els) {
             NodeAfterIfElse* after_if_else = new NodeAfterIfElse;
-            NodeScope* new_scope = new NodeScope;
-            parse_scope(new_scope);
-            after_if_else->scope = new_scope;
-            if (!(tokens[current].type == TokenType::scope_end)) {
-                cerr << "Expected else end\n";
-                exit(19);
-            }
+            after_if_else->scope = parse_scope();
+            parse_after_if();
             return after_if_else;
-        } else if (tokens[current].type == TokenType::elif_start) {
+        } else if (type == TokenType::elif_start) {
             NodeAfterIfElif* after_if_elif = new NodeAfterIfElif;
             after_if_elif->node_expr = parse_expr();
-            look_for_elif_end();
-            NodeScope* new_scope = new NodeScope;
-            parse_scope(new_scope);
-            after_if_elif->scope = new_scope;
+            look_for(TokenType::elif_end, "elif");
+            after_if_elif->scope = parse_scope();
             after_if_elif->after_if = parse_after_if();
             return after_if_elif;
-        } else {
-            cerr << "Invalid end of if\n";
-            exit(20);
         }
     }
 
-    void parse_stmts(NodeScope* scope) {
+    vector<NodeStmt*> parse_stmts() {
         if (next(TokenType::stmt_begin_end)) {
             current++;
-            parse_group_stmt_expr(scope);
+            return parse_group_stmt_expr();
         } else if (next(TokenType::if_start)) {
             current++;
             NodeStmtIf* stmt_if = new NodeStmtIf;
             stmt_if->node_expr = parse_expr();
-            look_for_if_end();
-            NodeScope* new_scope = new NodeScope;
-            parse_scope(new_scope);
-            stmt_if->scope = new_scope;
+            look_for(TokenType::if_end, "if");
+            stmt_if->scope = parse_scope();
             stmt_if->after_if = parse_after_if();
-
-            scope->stmts.push_back(stmt_if);
+            
+            return {stmt_if};
         } else {
             cerr << "Expected statement begin\n";
-            exit(8);
+            exit(20);
         }
     }
 
-    void look_for_scope_end() {
+    TokenType after_scope() {
+        optional<Token> next_token = try_next();
         if (next(TokenType::scope_end) || next(TokenType::elif_start) || next(TokenType::els)) {
             current++;
+            return next_token.value().type;
         } else {
             cerr << "Expected scope end\n";
-            exit(15);
+            exit(23);
         }
     }
 
-    void parse_scope(NodeScope* scope) {
+    NodeScope* parse_scope() {
+        NodeScope* scope = new NodeScope;
         while (try_next().has_value() && !next(TokenType::scope_end) && !next(TokenType::elif_start) && !next(TokenType::els)) {
-            parse_stmts(scope);
+            vector<NodeStmt*> stmts = parse_stmts();
+            for (auto &stmt: stmts) {
+                scope->stmts.push_back(stmt);
+            }
         }
-        look_for_scope_end();
+        return scope;
     }
 
-    void parse(NodeScope* scope) {
+    NodeProg* parse_prog() {
+        NodeProg* prog = new NodeProg;
         while (try_next().has_value()) {
-            parse_stmts(scope);
+            vector<NodeStmt*> stmts = parse_stmts();
+            for (auto &stmt: stmts) {
+                prog->stmts.push_back(stmt);
+            }
         }
+        return prog;
     }
 
 
 public:
     Parser(vector<Token> tokens) :tokens(tokens) {
-        parse(prog_node);
+        prog_node = parse_prog();
     } 
 
     NodeProg get_node_prog() {
