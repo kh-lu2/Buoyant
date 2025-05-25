@@ -25,12 +25,7 @@ int main(int argc, char* argv[]) {
 
     Lexer lexer(filepath);
     Parser parser(lexer.get_tokens());
-    Generator generator(parser.get_node_prog());
-
-
-    ofstream output_file("build/out.asm");
-    output_file << generator.get_assembly();
-    output_file.close();
+    Generator generator(parser.get_node_prog(), "build/out.asm");
     
     system("cd build && nasm -felf64 out.asm");
     system("cd build && ld -o out out.o");

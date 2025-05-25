@@ -14,8 +14,11 @@ private:
     }
 
 public:
-    Generator(NodeProg root) : root(root){
+    Generator(NodeProg root, string filename) : root(root){
         gen_prog();
+        ofstream output_file(filename);
+        output_file << assembly;
+        output_file.close();
     }
 
     string get_assembly() {
