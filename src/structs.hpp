@@ -152,16 +152,16 @@ struct NodeStmt {
     virtual ~NodeStmt() = default;
 };
 
-struct NodeStmtExpr : NodeStmt {
+struct NodeStmtSmpl : NodeStmt {
     NodeExpr* node_expr;
     virtual string generate(Stack& S) const {};
  
-    virtual ~NodeStmtExpr() {
+    virtual ~NodeStmtSmpl() {
         delete node_expr;
     };
 };
 
-struct NodeStmtExprRet : NodeStmtExpr {
+struct NodeStmtSmplRet : NodeStmtSmpl {
     string generate(Stack& S) const {
         string assembly;
         assembly += node_expr->generate(S);
@@ -172,7 +172,7 @@ struct NodeStmtExprRet : NodeStmtExpr {
     }
 };
 
-struct NodeStmtExprVar : NodeStmtExpr {
+struct NodeStmtSmplVar : NodeStmtSmpl {
     Token ident;
     string generate(Stack& S) const {
         string name = ident.value.value();

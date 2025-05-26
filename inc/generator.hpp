@@ -3,6 +3,8 @@
 #include <fstream>
 #include "../src/structs.hpp"
 
+using namespace std;
+
 class Generator {
 private:
     NodeProg root;

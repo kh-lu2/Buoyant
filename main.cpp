@@ -6,7 +6,7 @@
 
 #include "inc/lexer.h"
 #include "inc/generator.hpp"
-#include "src/parser.hpp"
+#include "inc/parser.h"
 
 using namespace std;
 using filesystem::path;
