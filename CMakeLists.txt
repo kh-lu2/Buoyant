@@ -4,4 +4,6 @@ project(buoyant)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(buoyant src/main.cpp src/lexer.hpp)
+AUX_SOURCE_DIRECTORY("${CMAKE_CURRENT_LIST_DIR}/src" SRC)
+
+add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC})

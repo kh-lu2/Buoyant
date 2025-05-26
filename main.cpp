@@ -4,9 +4,9 @@
 #include <optional>
 #include <filesystem>
 
-#include "lexer.hpp"
-#include "parser.hpp"
-#include "generator.hpp"
+#include "inc/lexer.h"
+#include "src/parser.hpp"
+#include "src/generator.hpp"
 
 using namespace std;
 using filesystem::path;
