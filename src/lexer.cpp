@@ -4,12 +4,12 @@
 using namespace std;
 using filesystem::path;
 
-optional<char> Lexer::try_next() {
+optional<char> Lexer::try_next() const {
     if (current + 1 >= source_file.size()) return {};
     return source_file[current + 1];
 }
 
-bool Lexer::next(char c) {
+bool Lexer::next(char c) const {
     return try_next().has_value() && try_next().value() == c;
 }
 
@@ -18,7 +18,7 @@ void Lexer::go_forward() {
     curr_pos++;
 }
 
-optional<TokenType> Lexer::cast_single(char c) {
+optional<TokenType> Lexer::cast_single(char c) const {
     switch (c) {
         case '&':
             return TokenType::ret;
@@ -123,6 +123,6 @@ Lexer::Lexer(path filepath) {
     tokenize();
 }
 
-vector<Token> Lexer::get_tokens() {
+vector<Token> Lexer::get_tokens() const {
     return tokens;
 }

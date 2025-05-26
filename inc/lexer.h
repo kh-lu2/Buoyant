@@ -17,18 +17,18 @@ private:
     int curr_line = 1;
     int curr_pos = 0;
 
-    optional<char> try_next();
+    optional<char> try_next() const;
 
-    bool next(char c);
+    bool next(char c) const;
 
     void go_forward();
 
-    optional<TokenType> cast_single(char c);
+    optional<TokenType> cast_single(char c) const;
 
     void tokenize();
 
 public:
     Lexer(path filepath);
 
-    vector<Token> get_tokens();
+    vector<Token> get_tokens() const;
 };
