@@ -19,7 +19,7 @@ $$$$
 ```
 ### Expression
 Expressions are anything that can be evaluated to a number. They are made of 0 or more mathematical operations: addition(`+`), substraction(`-`), multiplication(`o`) and division(`:`). The first two are of a lesser precedence the second two. You can use `()`, too. Expressions use numbers as well as variables.
-> **Note**: before variables can be used in expressions, they must have been [assigned a value](#simple-statement). 
+> **Note:** before variables can be used in expressions, they must have been [assigned a value](#simple-statement). 
 
 Examples:
 ```
@@ -122,7 +122,7 @@ Generating:
 ## Buoyancy
 Buoyancy is the power of a liquid to make an object float[^1]. The word looks absolutely gorgeous and is one of the very few words whose meaning you can feel based on its pronounciation. I decided it would be a great foundation for naming this project, and that is how Buoya and its compiler, Buoyant, came to life.
 
-> Fun fact: Buoyancy is also a person's ability to remain cheerful, even is sad or unpleasant situations[^2].
+> **Fun fact:** Buoyancy is also a person's ability to remain cheerful, even is sad or unpleasant situations[^2].
 
 [^1]: From Longman Dictionary of Contemporary English
 [^2]: From Collins English Dictionary
