@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include "../src/structs.hpp"
+#include "astnodes.h"
 
 using namespace std;
 

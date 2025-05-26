@@ -79,7 +79,7 @@ void Lexer::tokenize() {
                 tokens.push_back({TokenType::assign_expr, curr_line, curr_pos});
         } else if (c == '0') {
             go_forward();
-            tokens.push_back({TokenType::integer, curr_line, curr_pos, "0"});
+            tokens.push_back({TokenType::number, curr_line, curr_pos, "0"});
         } else if (isdigit(c)) {
             go_forward();
             string number {c};
@@ -90,7 +90,7 @@ void Lexer::tokenize() {
                 go_forward();
                 next_char = try_next();
             }
-            tokens.push_back({TokenType::integer, curr_line, num_pos, number});                
+            tokens.push_back({TokenType::number, curr_line, num_pos, number});                
         } else if (var_characters.find(c) != string::npos) {
             go_forward();
             string var_name {c};
@@ -101,7 +101,7 @@ void Lexer::tokenize() {
                 go_forward();
                 next_char = try_next();
             }
-            tokens.push_back({TokenType::identifier, curr_line, var_pos, var_name});
+            tokens.push_back({TokenType::variable, curr_line, var_pos, var_name});
         } else {
             cerr << "Buoya does not support that at line " + to_string(curr_line) +
             " and position " + to_string(curr_pos) + "\n";

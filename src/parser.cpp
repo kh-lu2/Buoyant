@@ -2,7 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <variant>
-#include "structs.hpp"
+#include "../inc/astnodes.h"
+#include "../inc/tokens.hpp"
 #include "../inc/parser.h"
 
 using namespace std;
@@ -59,21 +60,21 @@ TokenType Parser::after_scope() {
 }
 
 NodeTerm* Parser::parse_term() {
-    if (!next(TokenType::integer) && !next(TokenType::identifier)) {
+    if (!next(TokenType::number) && !next(TokenType::variable)) {
         cerr << "Invalid term in an expression " + get_location() + "\n";
         exit(24);
     }
 
     NodeTerm* node_term;
-    if (next(TokenType::integer)) node_term = new NodeTermInt;
-    else node_term = new NodeTermIdent;
+    if (next(TokenType::number)) node_term = new NodeTermNum;
+    else node_term = new NodeTermVar;
 
     node_term->token = tokens[++current];
     return node_term;
 };
 
 NodeExpr* Parser::parse_expr(const int& min_prec = 0) {
-    NodeExpr* expr_lhs = new NodeTerm;
+    NodeExpr* expr_lhs;
 
     if (next(TokenType::expr_start)) {
         current++;
@@ -91,12 +92,12 @@ NodeExpr* Parser::parse_expr(const int& min_prec = 0) {
         int next_min_prec = curr_prec.value() + 1;
         NodeExpr* expr_rhs = parse_expr(next_min_prec);
 
-        NodeBinExpr* expr;
+        NodeMathExpr* expr;
 
-        if (type == TokenType::addition) expr = new NodeBinExprAdd;
-        else if (type == TokenType::substraction) expr = new NodeBinExprSub;
-        else if (type == TokenType::multiplication) expr = new NodeBinExprMul;
-        else expr = new NodeBinExprDiv;
+        if (type == TokenType::addition) expr = new NodeMathExprAdd;
+        else if (type == TokenType::substraction) expr = new NodeMathExprSub;
+        else if (type == TokenType::multiplication) expr = new NodeMathExprMul;
+        else expr = new NodeMathExprDiv;
 
         expr->lhs = expr_lhs;
         expr->rhs = expr_rhs;
@@ -113,8 +114,8 @@ void Parser::assign(NodeStmtSmpl* node_stmt_expr, const string& stmt_name) {
         node_stmt_expr->node_expr = parse_expr();
     } else if (next(TokenType::assign_zero)) {
         current++;
-        NodeTermInt* node_term = new NodeTermInt;
-        node_term->token = {TokenType::integer, -1, -1, "0"};
+        NodeTermNum* node_term = new NodeTermNum;
+        node_term->token = {TokenType::number, -1, -1, "0"};
         node_stmt_expr->node_expr = node_term;
     } else {
         cerr << "Invalid " + stmt_name + " " + get_location() + "\n";
@@ -128,7 +129,7 @@ NodeStmtSmpl* Parser::parse_smpl_stmt() {
         NodeStmtSmplRet* exitnode = new NodeStmtSmplRet;
         assign(exitnode, "return statement");
         return exitnode;
-    } else if (next(TokenType::identifier)) {
+    } else if (next(TokenType::variable)) {
         NodeStmtSmplVar* varnode = new NodeStmtSmplVar;
         varnode->ident = try_next().value();
         current++;

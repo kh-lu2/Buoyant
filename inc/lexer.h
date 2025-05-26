@@ -3,7 +3,8 @@
 #include <vector>
 #include <filesystem>
 #include <optional>
-#include "../src/structs.hpp"
+#include "tokens.hpp"
+#include "astnodes.h"
 
 using namespace std;
 using filesystem::path;

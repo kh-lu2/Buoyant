@@ -1,7 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "../src/structs.hpp"
+#include "tokens.hpp"
+#include "astnodes.h"
 
 using namespace std;
 
