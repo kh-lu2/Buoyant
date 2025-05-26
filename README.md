@@ -2,7 +2,7 @@
 Welcome to **Buoyant**, a compiler for **Buoya**!
 
 ## Buoya
-Get to know some Buoyancy!
+Get to know some [Buoyancy](#buoyancy)!
 ### Number
 Buoya only supports integers in range (0, 255). Examples:
 ```
@@ -34,7 +34,7 @@ Simple statements are responsible for assigning values to variables. The basic s
 `. variable ~ expression .`
 If you want to assign zero, you can write:
 `. variable ~~ .`
-> **Important!** In Buoya, there is a special variable called `&`. If you assign something to this variable, your program will exit with exit code equal to the assigned expression.
+> **Important!** In Buoya, there is a special variable called `&`. If you assign something to this variable, your program will exit with exit code equal to the assigned expression. Buoya exits with 0 by default.
 
 You can join simple statements by putting a `,` between them:\
  `. smpl-stmt1 , smpl-stmt2 .`
@@ -95,7 +95,7 @@ Buoya ignores all white spaces and does not force you to write code in any parti
 ## Buoyant
 Buoyant compiles your Buoya code into assembly (will work on Linux x86-64 machines and wsl) and then automatically creates an executable for you. You can find all the build files in `/build`.
 
-To help you write working code, Buoyant offers a great range of error messages. If it failed to compile your program, it will give you tell you exactly where and what mistake you made!
+To help you write working code, Buoyant offers a great range of error messages. If it failed to compile your program, it will tell you exactly where and what mistake you made!
 
 All supported exit codes can be found below.\
 General:
@@ -118,3 +118,11 @@ Parsing:
 
 Generating:
 - 30 -> No variable like that (you used a variable before assigning value to it)
+
+## Buoyancy
+Buoyancy is the power of a liquid to make an object float[^1]. The word looks absolutely gorgeous and is one of the very few words whose meaning you can feel based on its pronounciation. I decided it would be a great foundation for naming this project, and that is how Buoya and its compiler, Buoyant, came to life.
+
+> Fun fact: Buoyancy is also a person's ability to remain cheerful, even is sad or unpleasant situations[^2].
+
+[^1]: From Longman Dictionary of Contemporary English
+[^2]: From Collins English Dictionary
