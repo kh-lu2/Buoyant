@@ -1,7 +1,7 @@
 #pragma once
 
-#include "structs.hpp"
-#include <unordered_map>
+#include <fstream>
+#include "../src/structs.hpp"
 
 class Generator {
 private:
@@ -14,14 +14,14 @@ private:
     }
 
 public:
-    Generator(NodeProg root, string filename) : root(root){
+    Generator(const NodeProg& root, const string& filename) : root(root) {
         gen_prog();
         ofstream output_file(filename);
         output_file << assembly;
         output_file.close();
     }
 
-    string get_assembly() {
+    string get_assembly() const {
         return assembly;
     }
 };

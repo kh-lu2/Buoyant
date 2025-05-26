@@ -5,8 +5,8 @@
 #include <filesystem>
 
 #include "inc/lexer.h"
+#include "inc/generator.hpp"
 #include "src/parser.hpp"
-#include "src/generator.hpp"
 
 using namespace std;
 using filesystem::path;

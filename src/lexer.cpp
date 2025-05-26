@@ -9,7 +9,7 @@ optional<char> Lexer::try_next() const {
     return source_file[current + 1];
 }
 
-bool Lexer::next(char c) const {
+bool Lexer::next(const char& c) const {
     return try_next().has_value() && try_next().value() == c;
 }
 
@@ -18,7 +18,7 @@ void Lexer::go_forward() {
     curr_pos++;
 }
 
-optional<TokenType> Lexer::cast_single(char c) const {
+optional<TokenType> Lexer::cast_single(const char& c) const {
     switch (c) {
         case '&':
             return TokenType::ret;
@@ -111,7 +111,7 @@ void Lexer::tokenize() {
 }
 
 
-Lexer::Lexer(path filepath) {
+Lexer::Lexer(const path& filepath) {
     ifstream source_stream(filepath);
     if (source_stream.fail()) {
         cerr << "Something wrong with file or filepath\n";

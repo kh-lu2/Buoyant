@@ -19,16 +19,16 @@ private:
 
     optional<char> try_next() const;
 
-    bool next(char c) const;
+    bool next(const char& c) const;
 
     void go_forward();
 
-    optional<TokenType> cast_single(char c) const;
+    optional<TokenType> cast_single(const char& c) const;
 
     void tokenize();
 
 public:
-    Lexer(path filepath);
+    Lexer(const path& filepath);
 
     vector<Token> get_tokens() const;
 };
