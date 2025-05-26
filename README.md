@@ -115,6 +115,7 @@ Parsing:
 - 24 -> Invalid term in an expression
 - 25 -> Invalid statement
 - 26 -> Invalid ....... statement (you messed up a simple statement)
+- 27 -> Invalid scope end (you did not end the scope after else)
 
 Generating:
 - 30 -> No variable like that (you used a variable before assigning value to it)

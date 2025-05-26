@@ -49,6 +49,7 @@ error codes:
 24 -> Invalid term in an expression (parser)
 25 -> invalid statement (parser)
 26 -> invalid ....... statement (parser)
+27 -> Invalid scope end (parser)
 
 30 -> No variable like that (generator)
 */

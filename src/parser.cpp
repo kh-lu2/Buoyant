@@ -157,7 +157,10 @@ optional<NodeAfterIf*> Parser::parse_after_if() {
     if (type == TokenType::els) {
         NodeAfterIfElse* after_if_else = new NodeAfterIfElse;
         after_if_else->scope = parse_scope();
-        parse_after_if();
+        if (after_scope() != TokenType::scope_end){
+            cerr << "Invalid scope end " + get_location() + "\n";
+            exit(27);
+        }           
         return after_if_else;
     } else if (type == TokenType::elif_start) {
         NodeAfterIfElif* after_if_elif = new NodeAfterIfElif;
