@@ -151,6 +151,13 @@ vector<NodeStmt*> Parser::parse_group_smpl_stmt() {
     return stmts_expr;
 }
 
+void Parser::assign_if(NodeIf* node_if, const TokenType& type, const string& token_name) {
+    node_if->node_expr = parse_expr();
+    look_for(type, token_name);
+    node_if->scope = parse_scope();
+    node_if->after_if = parse_after_if();
+}
+
 optional<NodeAfterIf*> Parser::parse_after_if() {
     TokenType type = after_scope();
     if (type == TokenType::scope_end) return {};
@@ -165,10 +172,7 @@ optional<NodeAfterIf*> Parser::parse_after_if() {
         return after_if_else;
     } else if (type == TokenType::elif_start) {
         NodeAfterIfElif* after_if_elif = new NodeAfterIfElif;
-        after_if_elif->node_expr = parse_expr();
-        look_for(TokenType::elif_end, "elif");
-        after_if_elif->scope = parse_scope();
-        after_if_elif->after_if = parse_after_if();
+        assign_if(after_if_elif, TokenType::elif_end, "elif");
         return after_if_elif;
     }
 }
@@ -180,10 +184,7 @@ vector<NodeStmt*> Parser::parse_stmts() {
     } else if (next(TokenType::if_start)) {
         current++;
         NodeStmtIf* stmt_if = new NodeStmtIf;
-        stmt_if->node_expr = parse_expr();
-        look_for(TokenType::if_end, "if");
-        stmt_if->scope = parse_scope();
-        stmt_if->after_if = parse_after_if();
+        assign_if(stmt_if, TokenType::if_end, "if");
         return {stmt_if};
     } else {
         cerr << "Expected statement begin " + get_location() + "\n";

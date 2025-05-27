@@ -36,6 +36,8 @@ private:
 
     vector<NodeStmt*> parse_group_smpl_stmt();
 
+    void assign_if(NodeIf* node_if, const TokenType& type, const string& token_name);
+
     optional<NodeAfterIf*> parse_after_if();
 
     vector<NodeStmt*> parse_stmts();
