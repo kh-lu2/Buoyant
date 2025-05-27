@@ -22,19 +22,19 @@ struct NodeMathExpr : NodeExpr {
 };
 
 struct NodeMathExprAdd : NodeMathExpr {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeMathExprSub : NodeMathExpr {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeMathExprMul : NodeMathExpr {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeMathExprDiv : NodeMathExpr {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeTerm : NodeExpr {
@@ -44,11 +44,11 @@ struct NodeTerm : NodeExpr {
 };
 
 struct NodeTermNum : NodeTerm {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeTermVar : NodeTerm {
-    string generate (Stack& S) const;
+    string generate (Stack& S) const override;
 };
 
 struct NodeStmt {
@@ -63,17 +63,17 @@ struct NodeStmtSmpl : NodeStmt {
 };
 
 struct NodeStmtSmplRet : NodeStmtSmpl {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeStmtSmplVar : NodeStmtSmpl {
     Token ident;
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeScope : NodeStmt {
     vector<NodeStmt*> stmts;
-    virtual string generate(Stack& S) const;
+    virtual string generate(Stack& S) const override;
 };
 
 struct NodeAfterIf {
@@ -89,18 +89,18 @@ struct NodeIf {
 };
 
 struct NodeStmtIf : NodeStmt, NodeIf {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
 
 struct NodeAfterIfElif : NodeAfterIf, NodeIf {
-    string generate(Stack& S, string end_label) const;
+    string generate(Stack& S, string end_label) const override;
 };
 
 struct NodeAfterIfElse : NodeAfterIf {
     NodeScope* scope;
-    string generate(Stack& S, string end_label) const;
+    string generate(Stack& S, string end_label) const override;
 };
 
 struct NodeProg : NodeScope {
-    string generate(Stack& S) const;
+    string generate(Stack& S) const override;
 };
