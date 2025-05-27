@@ -107,28 +107,7 @@ string NodeScope::generate(Stack& S) const {
     return assembly;
 }
 
-string NodeStmtIf::generate(Stack& S) const {
-    string assembly;
-    assembly += node_expr->generate(S);
-    assembly += S.pop("rax");
-    string label = S.create_label();
-    assembly += "    test rax, rax\n";
-    assembly += "    jz " + label + "\n";
-    assembly += scope->generate(S);
-
-    if (after_if.has_value()) {
-        string end_label = S.create_label();
-        assembly += "    jmp " + end_label + "\n";
-        assembly += label + ":\n";
-        assembly += after_if.value()->generate(S, end_label);
-        assembly += end_label + ":\n";
-    } else {
-        assembly += label + ":\n";
-    }
-    return assembly;
-}
-
-string NodeAfterIfElif::generate(Stack& S, string end_label) const {
+string NodeIf::generate(Stack& S, string end_label) const {
     string assembly;
     assembly += node_expr->generate(S);
     assembly += S.pop("rax");
@@ -137,13 +116,21 @@ string NodeAfterIfElif::generate(Stack& S, string end_label) const {
     assembly += "    jz " + label + "\n";
     assembly += scope->generate(S);
     assembly += "    jmp " + end_label + "\n";
+    assembly += label + ":\n";
     if (after_if.has_value()) {
-        assembly += label + ":\n";
         assembly += after_if.value()->generate(S, end_label);
-    } else {
-        assembly += label + ":\n";
     }
+    assembly += end_label + ":\n";
     return assembly;
+}
+
+string NodeStmtIf::generate(Stack& S) const {
+    string end_label = S.create_label();
+    return NodeIf::generate(S, end_label);
+}
+
+string NodeAfterIfElif::generate(Stack& S, string end_label) const {
+    return NodeIf::generate(S, end_label);
 }
 
 string NodeAfterIfElse::generate(Stack& S, string end_label) const {

@@ -81,17 +81,18 @@ struct NodeAfterIf {
     virtual ~NodeAfterIf() = default;
 };
 
-struct NodeStmtIf : NodeStmt {
+struct NodeIf {
     NodeExpr* node_expr;
     NodeScope* scope;
     optional<NodeAfterIf*> after_if;
+    virtual string generate(Stack& S, string end_label) const;
+};
+
+struct NodeStmtIf : NodeStmt, NodeIf {
     string generate(Stack& S) const;
 };
 
-struct NodeAfterIfElif : NodeAfterIf {
-    NodeExpr* node_expr;
-    NodeScope* scope;
-    optional<NodeAfterIf*> after_if; 
+struct NodeAfterIfElif : NodeAfterIf, NodeIf {
     string generate(Stack& S, string end_label) const;
 };
 
