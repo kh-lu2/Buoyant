@@ -33,7 +33,7 @@ struct Token {
     int position;
     optional<string> value;
 
-    string location(const bool end = 1) const {
+    string location(const bool end = 0) const {
         int new_pos = position;
         if (end) new_pos += (value.has_value() ? value.value().size() : 1);
         return "at line " + to_string(line) + " and position " + to_string(new_pos);
