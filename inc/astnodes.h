@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 #include <iostream>
+#include <memory>
 #include <unordered_map>
 #include "../inc/stack.hpp"
 #include "../inc/tokens.hpp"
@@ -15,10 +16,10 @@ struct NodeExpr {
 };
 
 struct NodeMathExpr : NodeExpr {
-    NodeExpr* lhs;
-    NodeExpr* rhs;
+    unique_ptr<NodeExpr> lhs;
+    unique_ptr<NodeExpr> rhs;
     virtual string generate(Stack& S, string operation) const;
-    virtual ~NodeMathExpr();
+    virtual ~NodeMathExpr() = default;
 };
 
 struct NodeMathExprAdd : NodeMathExpr {
@@ -57,9 +58,9 @@ struct NodeStmt {
 };
 
 struct NodeStmtSmpl : NodeStmt {
-    NodeExpr* node_expr;
+    unique_ptr<NodeExpr> node_expr;
     virtual string generate(Stack& S) const = 0;
-    virtual ~NodeStmtSmpl();
+    virtual ~NodeStmtSmpl() = default;
 };
 
 struct NodeStmtSmplRet : NodeStmtSmpl {
@@ -72,7 +73,7 @@ struct NodeStmtSmplVar : NodeStmtSmpl {
 };
 
 struct NodeScope : NodeStmt {
-    vector<NodeStmt*> stmts;
+    vector<shared_ptr<NodeStmt>> stmts;
     virtual string generate(Stack& S) const override;
 };
 
@@ -82,9 +83,9 @@ struct NodeAfterIf {
 };
 
 struct NodeIf {
-    NodeExpr* node_expr;
-    NodeScope* scope;
-    optional<NodeAfterIf*> after_if;
+    unique_ptr<NodeExpr> node_expr;
+    unique_ptr<NodeScope> scope;
+    optional<shared_ptr<NodeAfterIf>> after_if;
     virtual string generate(Stack& S, string end_label) const;
 };
 
@@ -97,7 +98,7 @@ struct NodeAfterIfElif : NodeAfterIf, NodeIf {
 };
 
 struct NodeAfterIfElse : NodeAfterIf {
-    NodeScope* scope;
+    unique_ptr<NodeScope> scope;
     string generate(Stack& S, string end_label) const override;
 };
 

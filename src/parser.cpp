@@ -59,22 +59,22 @@ TokenType Parser::after_scope() {
     return tokens[++current].type;
 }
 
-NodeTerm* Parser::parse_term() {
+unique_ptr<NodeTerm> Parser::parse_term() {
     if (!next(TokenType::number) && !next(TokenType::variable)) {
         cerr << "Invalid term in an expression " + get_location() + "\n";
         exit(24);
     }
 
-    NodeTerm* node_term;
-    if (next(TokenType::number)) node_term = new NodeTermNum;
-    else node_term = new NodeTermVar;
+    unique_ptr<NodeTerm> node_term;
+    if (next(TokenType::number)) node_term = make_unique<NodeTermNum>();
+    else node_term = make_unique<NodeTermVar>();
 
     node_term->token = tokens[++current];
     return node_term;
 };
 
-NodeExpr* Parser::parse_expr(const int& min_prec = 0) {
-    NodeExpr* expr_lhs;
+unique_ptr<NodeExpr> Parser::parse_expr(const int& min_prec = 0) {
+    unique_ptr<NodeExpr> expr_lhs;
 
     if (next(TokenType::expr_start)) {
         current++;
@@ -90,47 +90,47 @@ NodeExpr* Parser::parse_expr(const int& min_prec = 0) {
 
         TokenType type = tokens[++current].type;
         int next_min_prec = curr_prec.value() + 1;
-        NodeExpr* expr_rhs = parse_expr(next_min_prec);
+        unique_ptr<NodeExpr> expr_rhs = parse_expr(next_min_prec);
 
-        NodeMathExpr* expr;
+        unique_ptr<NodeMathExpr> expr;
 
-        if (type == TokenType::addition) expr = new NodeMathExprAdd;
-        else if (type == TokenType::substraction) expr = new NodeMathExprSub;
-        else if (type == TokenType::multiplication) expr = new NodeMathExprMul;
-        else expr = new NodeMathExprDiv;
+        if (type == TokenType::addition) expr = make_unique<NodeMathExprAdd>();
+        else if (type == TokenType::substraction) expr = make_unique<NodeMathExprSub>();
+        else if (type == TokenType::multiplication) expr = make_unique<NodeMathExprMul>();
+        else expr = make_unique<NodeMathExprDiv>();
 
-        expr->lhs = expr_lhs;
-        expr->rhs = expr_rhs;
+        expr->lhs = move(expr_lhs);
+        expr->rhs = move(expr_rhs);
         
-        expr_lhs = expr;    
+        expr_lhs = move(expr);    
     }
 
     return expr_lhs;
 }
 
-void Parser::assign(NodeStmtSmpl* node_stmt_expr, const string& stmt_name) {
+void Parser::assign(shared_ptr<NodeStmtSmpl> node_stmt_expr, const string& stmt_name) {
     if (next(TokenType::assign_expr)) {
         current++;
         node_stmt_expr->node_expr = parse_expr();
     } else if (next(TokenType::assign_zero)) {
         current++;
-        NodeTermNum* node_term = new NodeTermNum;
+        unique_ptr<NodeTermNum> node_term(new NodeTermNum);
         node_term->token = {TokenType::number, -1, -1, "0"};
-        node_stmt_expr->node_expr = node_term;
+        node_stmt_expr->node_expr = move(node_term);
     } else {
         cerr << "Invalid " + stmt_name + " " + get_location() + "\n";
         exit(26);
     }
 }
 
-NodeStmtSmpl* Parser::parse_smpl_stmt() {
+shared_ptr<NodeStmtSmpl> Parser::parse_smpl_stmt() {
     if (next(TokenType::ret)) {
         current++;
-        NodeStmtSmplRet* exitnode = new NodeStmtSmplRet;
+        shared_ptr<NodeStmtSmplRet> exitnode(new NodeStmtSmplRet);
         assign(exitnode, "return statement");
         return exitnode;
     } else if (next(TokenType::variable)) {
-        NodeStmtSmplVar* varnode = new NodeStmtSmplVar;
+        shared_ptr<NodeStmtSmplVar> varnode(new NodeStmtSmplVar);
         varnode->ident = try_next().value();
         current++;
         assign(varnode, "variable assignment");
@@ -141,8 +141,8 @@ NodeStmtSmpl* Parser::parse_smpl_stmt() {
     }
 };
 
-vector<NodeStmt*> Parser::parse_group_smpl_stmt() {
-    vector<NodeStmt*> stmts_expr;
+vector<shared_ptr<NodeStmt>> Parser::parse_group_smpl_stmt() {
+    vector<shared_ptr<NodeStmt>> stmts_expr;
     TokenType separator = TokenType::stmt_middle;
     while (separator == TokenType::stmt_middle) {
         stmts_expr.push_back(parse_smpl_stmt());
@@ -151,19 +151,19 @@ vector<NodeStmt*> Parser::parse_group_smpl_stmt() {
     return stmts_expr;
 }
 
-void Parser::assign_if(NodeIf* node_if, const TokenType& type, const string& token_name) {
+void Parser::assign_if(shared_ptr<NodeIf> node_if, const TokenType& type, const string& token_name) {
     node_if->node_expr = parse_expr();
     look_for(type, token_name);
     node_if->scope = parse_scope();
     node_if->after_if = parse_after_if();
 }
 
-optional<NodeAfterIf*> Parser::parse_after_if() {
+optional<shared_ptr<NodeAfterIf>> Parser::parse_after_if() {
     TokenType type = after_scope();
     if (type == TokenType::scope_end) return {};
     
     if (type == TokenType::els) {
-        NodeAfterIfElse* after_if_else = new NodeAfterIfElse;
+        shared_ptr<NodeAfterIfElse> after_if_else(new NodeAfterIfElse);
         after_if_else->scope = parse_scope();
         if (after_scope() != TokenType::scope_end){
             cerr << "Invalid scope end " + get_location() + "\n";
@@ -171,19 +171,19 @@ optional<NodeAfterIf*> Parser::parse_after_if() {
         }           
         return after_if_else;
     } else if (type == TokenType::elif_start) {
-        NodeAfterIfElif* after_if_elif = new NodeAfterIfElif;
+        shared_ptr<NodeAfterIfElif> after_if_elif(new NodeAfterIfElif);
         assign_if(after_if_elif, TokenType::elif_end, "elif");
         return after_if_elif;
     }
 }
 
-vector<NodeStmt*> Parser::parse_stmts() {
+vector<shared_ptr<NodeStmt>> Parser::parse_stmts() {
     if (next(TokenType::stmt_begin_end)) {
         current++;
         return parse_group_smpl_stmt();
     } else if (next(TokenType::if_start)) {
         current++;
-        NodeStmtIf* stmt_if = new NodeStmtIf;
+        shared_ptr<NodeStmtIf> stmt_if(new NodeStmtIf);
         assign_if(stmt_if, TokenType::if_end, "if");
         return {stmt_if};
     } else {
@@ -192,19 +192,19 @@ vector<NodeStmt*> Parser::parse_stmts() {
     }
 }
 
-NodeScope* Parser::parse_scope() {
-    NodeScope* scope = new NodeScope;
+unique_ptr<NodeScope> Parser::parse_scope() {
+    unique_ptr<NodeScope> scope(new NodeScope);
     while (try_next().has_value() && !next(TokenType::scope_end) && !next(TokenType::elif_start) && !next(TokenType::els)) {
-        vector<NodeStmt*> stmts = parse_stmts();
+        vector<shared_ptr<NodeStmt>> stmts = parse_stmts();
         for (auto &stmt: stmts) scope->stmts.push_back(stmt);
     }
     return scope;
 }
 
-NodeProg* Parser::parse_prog() {
-    NodeProg* prog = new NodeProg;
+unique_ptr<NodeProg> Parser::parse_prog() {
+    unique_ptr<NodeProg> prog(new NodeProg);
     while (try_next().has_value()) {
-        vector<NodeStmt*> stmts = parse_stmts();
+        vector<shared_ptr<NodeStmt>> stmts = parse_stmts();
         for (auto &stmt: stmts) prog->stmts.push_back(stmt);
     }
     return prog;
@@ -216,8 +216,4 @@ Parser::Parser(const vector<Token>& tokens) : tokens(tokens) {
 
 NodeProg Parser::get_node_prog() const {
     return *prog_node;
-}
-
-Parser::~Parser() {
-    for (auto &stmt: prog_node->stmts) delete stmt;
 }

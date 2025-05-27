@@ -22,10 +22,6 @@ string NodeMathExpr::generate(Stack& S, string operation) const {
     assembly += S.push("rax");
     return assembly;
 };
-NodeMathExpr::~NodeMathExpr() {
-    delete lhs;
-    delete rhs;
-}
 
 string NodeMathExprAdd::generate(Stack& S) const {
     return NodeMathExpr::generate(S, "    add rax, rbx\n");
@@ -58,10 +54,6 @@ string NodeTermVar::generate (Stack& S) const {
     }
     return S.push("qword [rsp + " + to_string((S.stack_ptr - S.variables[token.value.value()] - 1) * 8) + "]");
 }
- 
-NodeStmtSmpl::~NodeStmtSmpl() {
-    delete node_expr;
-};
 
 string NodeStmtSmplRet::generate(Stack& S) const {
     string assembly;
