@@ -18,7 +18,7 @@ $$$$
 %#$@$##@
 ```
 ### Expression
-Expressions are anything that can be evaluated to a number. They are made of 0 or more mathematical operations: addition(`+`), substraction(`-`), multiplication(`o`) and division(`:`). The first two are of a lesser precedence the second two. You can use `()`, too. Expressions use numbers as well as variables.
+Expressions are anything that can be evaluated to a number. They are made of 0 or more mathematical operations: addition(`+`), substraction(`-`), multiplication(`o`) and division(`:`). The first two are of a lesser precedence than the second two. You can use `()`, too. Expressions use numbers as well as variables.
 > **Note:** before variables can be used in expressions, they must have been [assigned a value](#simple-statement). 
 
 Examples:
