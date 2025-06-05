@@ -126,9 +126,7 @@ string NodeAfterIfElif::generate(Stack& S, string end_label) const {
 }
 
 string NodeAfterIfElse::generate(Stack& S, string end_label) const {
-    string assembly;
-    assembly += scope->generate(S);
-    return assembly;
+    return scope->generate(S);
 }
 
 string NodeProg::generate(Stack& S) const {
